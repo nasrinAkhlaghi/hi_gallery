@@ -28,4 +28,4 @@ def downgrade() -> None:
         "cart_item", "cart", "product_image", "product", "category",
         "admin", "seller", "buyer", "account",
     ):
-        op.execute(f'DROP TABLE IF EXISTS "{table}" CASCADE')
+        op.execute(f'DROP TABLE IF EXISTS "{table}"')

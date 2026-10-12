@@ -28,5 +28,8 @@ class Category(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=text("now()"))
 
     parent: Mapped[Category | None] = relationship(remote_side="Category.id", back_populates="children")
-    children: Mapped[list[Category]] = relationship(back_populates="parent")
+    children: Mapped[list[Category]] = relationship(
+        back_populates="parent",
+        passive_deletes="all",
+    )
     products: Mapped[list[Product]] = relationship(back_populates="category")
