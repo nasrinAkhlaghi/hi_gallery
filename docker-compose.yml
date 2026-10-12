@@ -4,15 +4,15 @@ services:
     container_name: hi-gallery-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: hi_gallery
-      POSTGRES_USER: hi_gallery
-      POSTGRES_PASSWORD: hi_gallery_dev
+      POSTGRES_DB: ${POSTGRES_DB:?Copy .env.example to .env first}
+      POSTGRES_USER: ${POSTGRES_USER:?Copy .env.example to .env first}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Copy .env.example to .env first}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:?Copy .env.example to .env first}:5432"
     volumes:
       - hi_gallery_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hi_gallery -d hi_gallery"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
