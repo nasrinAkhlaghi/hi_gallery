@@ -4,6 +4,7 @@
 - Account: authentication credentials and lifecycle.
 - Buyer: one-to-one with Account.
 - Seller: one-to-one with Account; owns products.
+- SellerStatusHistory: append-only seller lifecycle event with actor type/identity and transition data.
 - Admin: one-to-one with Account.
 - Category: hierarchical product classification.
 - Product: belongs to exactly one Seller and Category.
@@ -21,6 +22,7 @@ Account 1—0..1 Buyer
 Account 1—0..1 Seller
 Account 1—0..1 Admin
 Seller 1—N Product
+Seller 1—N SellerStatusHistory
 Category 1—N Product
 Category 1—N Category
 Product 1—N ProductImage
@@ -39,6 +41,9 @@ Order 1—N Review
 
 ## Invariants
 - Seller may modify only own products/orders.
+- New seller profiles begin in `DRAFT`; explicit submission changes `DRAFT` to `PENDING`. Existing PENDING records are preserved by migration.
+- Seller lifecycle transitions are recorded in `seller_status_history` in the same transaction. `actor_type` identifies SELLER or ADMIN; actor identity comes from authenticated context (or the seller account during registration), never from request input.
+- Phase 4.1 history starts with registration (`NULL` → `DRAFT`) and submission (`DRAFT` → `PENDING`); no historical events are fabricated for existing sellers. Later Admin decisions must append their own events.
 - OrderItem seller must match SellerOrder seller.
 - Prices and stock cannot be negative.
 - CartItem/OrderItem quantity must be positive.

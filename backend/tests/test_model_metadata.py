@@ -11,8 +11,9 @@ from app.db.session import Base
 DOCUMENTED_TABLES = {
     "account", "buyer", "seller", "admin", "category", "product", "product_image",
     "cart", "cart_item", "orders", "seller_order", "order_item", "payment", "review",
+    "seller_status_history", "refresh_tokens",
 }
-EXPECTED_TABLES = DOCUMENTED_TABLES | {"refresh_tokens"}
+EXPECTED_TABLES = DOCUMENTED_TABLES
 
 
 def test_all_documented_entities_are_registered_with_alembic_metadata() -> None:
@@ -20,16 +21,22 @@ def test_all_documented_entities_are_registered_with_alembic_metadata() -> None:
     configure_mappers()
 
 
-def test_migration_schema_snapshot_matches_authoritative_document() -> None:
+def test_initial_migration_snapshot_stays_historical_and_current_schema_documents_phase_4_1() -> None:
     repository_root = Path(__file__).resolve().parents[2]
     migration_schema = (repository_root / "backend" / "alembic" / "schema.sql").read_text(encoding="utf-8")
-    documented_schema = (repository_root / "docs" / "04-database-schema.sql").read_text(encoding="utf-8")
+    current_schema = (repository_root / "docs" / "04-database-schema.sql").read_text(encoding="utf-8")
+    initial_migration = (repository_root / "backend" / "alembic" / "versions" / "0001_initial_schema.py").read_text(encoding="utf-8")
 
-    assert migration_schema == documented_schema
+    assert "status VARCHAR(30) NOT NULL DEFAULT 'PENDING'" in migration_schema
+    assert "seller_status_history" not in migration_schema
+    assert "seller_status_history" in current_schema
+    assert "status VARCHAR(30) NOT NULL DEFAULT 'DRAFT'" in current_schema
+    assert '"schema.sql"' in initial_migration
 
 
 def test_model_columns_and_named_indexes_match_documented_schema() -> None:
-    schema_path = Path(__file__).resolve().parents[1] / "alembic" / "schema.sql"
+    repository_root = Path(__file__).resolve().parents[2]
+    schema_path = repository_root / "docs" / "04-database-schema.sql"
     schema = schema_path.read_text(encoding="utf-8")
     documented_tables = {
         table_name: body
@@ -63,7 +70,8 @@ def test_model_columns_and_named_indexes_match_documented_schema() -> None:
 
 
 def test_documented_foreign_keys_and_unique_constraints_match_metadata() -> None:
-    schema_path = Path(__file__).resolve().parents[1] / "alembic" / "schema.sql"
+    repository_root = Path(__file__).resolve().parents[2]
+    schema_path = repository_root / "docs" / "04-database-schema.sql"
     schema = schema_path.read_text(encoding="utf-8")
     documented_tables = {
         table_name: body
@@ -110,7 +118,8 @@ def test_documented_foreign_keys_and_unique_constraints_match_metadata() -> None
 
 
 def test_documented_column_types_and_nullability_match_metadata() -> None:
-    schema_path = Path(__file__).resolve().parents[1] / "alembic" / "schema.sql"
+    repository_root = Path(__file__).resolve().parents[2]
+    schema_path = repository_root / "docs" / "04-database-schema.sql"
     schema = schema_path.read_text(encoding="utf-8")
     documented_tables = {
         table_name: body

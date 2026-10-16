@@ -1,4 +1,5 @@
--- HI Gallery — V1__init_schema.sql
+-- HI Gallery current schema reference after migrations 0001-0003.
+-- The immutable 0001 initial-schema source remains backend/alembic/schema.sql.
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE account (
@@ -9,6 +10,18 @@ CREATE TABLE account (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT ck_account_status CHECK (status IN ('ACTIVE','SUSPENDED','DELETED'))
+);
+
+CREATE TABLE refresh_tokens (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    account_id UUID NOT NULL REFERENCES account(id) ON DELETE CASCADE,
+    token_hash VARCHAR(64) NOT NULL UNIQUE,
+    family_id UUID NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    expires_at TIMESTAMPTZ NOT NULL,
+    revoked_at TIMESTAMPTZ,
+    replacement_token_id UUID UNIQUE REFERENCES refresh_tokens(id) ON DELETE SET NULL,
+    reuse_detected_at TIMESTAMPTZ
 );
 
 CREATE TABLE buyer (
@@ -25,10 +38,31 @@ CREATE TABLE seller (
     shop_name VARCHAR(150) NOT NULL,
     description TEXT,
     logo_url TEXT,
-    status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+    status VARCHAR(30) NOT NULL DEFAULT 'DRAFT',
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT ck_seller_status CHECK (status IN ('PENDING','ACTIVE','SUSPENDED','REJECTED'))
+    CONSTRAINT ck_seller_status CHECK (status IN ('DRAFT','PENDING','ACTIVE','SUSPENDED','REJECTED'))
+);
+
+CREATE TABLE seller_status_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    seller_id UUID NOT NULL REFERENCES seller(id),
+    previous_status VARCHAR(30),
+    new_status VARCHAR(30) NOT NULL,
+    actor_account_id UUID NOT NULL REFERENCES account(id),
+    actor_type VARCHAR(20) NOT NULL,
+    action VARCHAR(40) NOT NULL,
+    reason TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT ck_seller_status_history_previous_status CHECK (
+        previous_status IS NULL OR previous_status IN ('DRAFT','PENDING','ACTIVE','SUSPENDED','REJECTED')
+    ),
+    CONSTRAINT ck_seller_status_history_new_status CHECK (
+        new_status IN ('DRAFT','PENDING','ACTIVE','SUSPENDED','REJECTED')
+    ),
+    CONSTRAINT ck_seller_status_history_actor_type CHECK (
+        actor_type IN ('SELLER','ADMIN')
+    )
 );
 
 CREATE TABLE admin (
@@ -177,3 +211,8 @@ CREATE INDEX idx_order_item_product ON order_item(product_id);
 CREATE INDEX idx_review_product ON review(product_id);
 CREATE INDEX idx_review_buyer ON review(buyer_id);
 CREATE INDEX idx_category_parent ON category(parent_id);
+CREATE INDEX ix_seller_status_history_seller_created ON seller_status_history(seller_id,created_at);
+CREATE INDEX ix_seller_status_history_actor_account ON seller_status_history(actor_account_id);
+CREATE INDEX ix_refresh_tokens_account_id ON refresh_tokens(account_id);
+CREATE INDEX ix_refresh_tokens_family_id ON refresh_tokens(family_id);
+CREATE INDEX ix_refresh_tokens_expires_at ON refresh_tokens(expires_at);

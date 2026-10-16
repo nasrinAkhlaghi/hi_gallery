@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.core.config import get_settings
-from app.db.models import Account, RefreshToken, Seller
+from app.db.models import Account, RefreshToken, Seller, SellerStatusHistory
 from app.db.session import Base, get_db
 from app.main import app
 from app.modules.auth.dependencies import ACCESS_COOKIE, CSRF_COOKIE, REFRESH_COOKIE, require_roles
@@ -116,7 +116,7 @@ def test_buyer_registration_normalizes_email_and_never_returns_hash_or_tokens(au
         assert account.admin is None
 
 
-def test_seller_registration_creates_only_pending_seller_and_rejects_role_assignment(auth_client) -> None:
+def test_seller_registration_creates_only_draft_seller_with_audit_and_rejects_role_assignment(auth_client) -> None:
     client, sessions = auth_client
     token = csrf(client)
     response = client.post(
@@ -140,15 +140,22 @@ def test_seller_registration_creates_only_pending_seller_and_rejects_role_assign
     )
     assert response.status_code == 201
     assert response.json()["roles"] == ["SELLER"]
-    assert response.json()["seller_status"] == "PENDING"
+    assert response.json()["seller_status"] == "DRAFT"
     with sessions() as session:
         seller = session.scalar(select(Seller))
-        assert seller is not None and seller.status == "PENDING"
+        assert seller is not None and seller.status == "DRAFT"
         assert seller.account.buyer is None and seller.account.admin is None
+        history = session.scalars(select(SellerStatusHistory).where(SellerStatusHistory.seller_id == seller.id)).all()
+        assert len(history) == 1
+        assert history[0].previous_status is None
+        assert history[0].new_status == "DRAFT"
+        assert history[0].actor_account_id == seller.account_id
+        assert history[0].actor_type == "SELLER"
+        assert history[0].action == "SELLER_REGISTERED"
 
 
 def test_duplicate_email_registration_is_rejected_after_normalization(auth_client) -> None:
-    client, _ = auth_client
+    client, sessions = auth_client
     assert register_buyer(client).status_code == 201
     token = csrf(client)
     response = client.post(
@@ -406,7 +413,7 @@ def test_csrf_requires_signed_double_submit_pair_and_allowed_origin(auth_client)
 
 
 def test_missing_authentication_returns_401_and_pending_seller_is_denied_active_access(auth_client) -> None:
-    client, _ = auth_client
+    client, sessions = auth_client
     assert client.get(f"{AUTH}/me").status_code == 401
 
     token = csrf(client)
@@ -416,6 +423,11 @@ def test_missing_authentication_returns_401_and_pending_seller_is_denied_active_
         headers={"X-CSRF-Token": token},
     )
     assert registration.status_code == 201
+    with sessions() as session:
+        seller = session.scalar(select(Seller))
+        assert seller is not None
+        seller.status = "PENDING"
+        session.commit()
     login(client, email="seller@example.com")
     access = client.cookies.get(ACCESS_COOKIE)
 

@@ -4,6 +4,7 @@ import { Link, NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { AuthControls } from "../auth/AuthControls";
+import { useAuth } from "../auth/AuthContext";
 
 type RoutePlaceholderProps = {
   titleKey: string;
@@ -35,21 +36,25 @@ export function BuyerRoutePlaceholder(props: Omit<RoutePlaceholderProps, "showLa
 
 type WorkspaceArea = "seller" | "admin";
 
-const sellerLinks = ["dashboard", "products", "orders", "shop", "settings"] as const;
+const sellerLinks = ["dashboard", "products", "orders", "shop", "settings", "onboarding"] as const;
 const adminLinks = ["dashboard", "sellers", "buyers", "products", "orders", "reviews", "reports"] as const;
 
 function WorkspaceNavigationLinks({
   area,
+  sellerOnboardingOnly = false,
   mobile = false,
   onNavigate,
 }: {
   area: WorkspaceArea;
+  sellerOnboardingOnly?: boolean;
   mobile?: boolean;
   onNavigate?: () => void;
 }) {
   const { t } = useTranslation();
   const basePath = `/${area}`;
-  const links = area === "seller" ? sellerLinks : adminLinks;
+  const links = area === "seller"
+    ? sellerOnboardingOnly ? (["onboarding"] as const) : sellerLinks.filter((page) => page !== "onboarding")
+    : adminLinks;
 
   return links.map((page) => {
     const to = page === "dashboard" ? basePath : `${basePath}/${page}`;
@@ -76,10 +81,12 @@ function WorkspaceNavigationLinks({
 
 export function WorkspaceLayout({ area }: { area: WorkspaceArea }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
   const mobileNavigationRef = useRef<HTMLElement>(null);
   const areaLabel = t(area === "seller" ? "workspace.sellerStudio" : "workspace.adminConsole");
+  const sellerOnboardingOnly = area === "seller" && user?.seller_status !== "ACTIVE";
 
   useEffect(() => {
     if (!mobileMenuOpen) return;
@@ -118,7 +125,7 @@ export function WorkspaceLayout({ area }: { area: WorkspaceArea }) {
             <h1 className="mt-1 font-display text-xl">{areaLabel}</h1>
           </div>
           <nav aria-label={t("workspace.navigationLabel", { area: areaLabel })} className="hidden items-center gap-x-5 text-sm md:flex">
-            <WorkspaceNavigationLinks area={area} />
+            <WorkspaceNavigationLinks area={area} sellerOnboardingOnly={sellerOnboardingOnly} />
           </nav>
           <div className="flex items-center gap-3">
             <span className="hidden sm:block"><AuthControls /></span>
@@ -141,7 +148,7 @@ export function WorkspaceLayout({ area }: { area: WorkspaceArea }) {
             aria-label={t("workspace.navigationLabel", { area: areaLabel })}
             className={`${mobileMenuOpen ? "flex" : "hidden"} order-last w-full flex-col gap-1 rounded-2xl border border-border bg-background p-2 text-sm shadow-md md:hidden`}
           >
-            <WorkspaceNavigationLinks area={area} mobile onNavigate={() => setMobileMenuOpen(false)} />
+            <WorkspaceNavigationLinks area={area} sellerOnboardingOnly={sellerOnboardingOnly} mobile onNavigate={() => setMobileMenuOpen(false)} />
             <LanguageSwitcher className="mt-1 w-full" onLanguageChange={() => setMobileMenuOpen(false)} />
             <div className="px-3 py-2"><AuthControls /></div>
           </nav>

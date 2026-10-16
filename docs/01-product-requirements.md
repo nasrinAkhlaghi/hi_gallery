@@ -8,7 +8,7 @@ HI Gallery (Human Intelligence Gallery) is an online marketplace focused on hand
 Register/login, browse/search products, browse categories, view product details, manage cart, checkout/pay, view orders, review purchased products, report problems.
 
 ### Seller
-Register, create shop profile, create/manage own products, select categories, upload images, set price/stock, view/manage own seller orders, view sales information.
+Register, complete a store profile, explicitly submit it for Admin review, then after approval create/manage own products, select categories, upload images, set price/stock, view/manage own seller orders, and view sales information.
 
 ### Admin
 View platform statistics, manage sellers and approvals, view buyers/products/orders/reviews, moderate content and reports.
@@ -25,7 +25,7 @@ View platform statistics, manage sellers and approvals, view buyers/products/ord
 9. Backend authorization is the security boundary.
 
 ## MVP
-Authentication, seller approval, product CRUD, categories, images, browse/search, cart, checkout, orders/SellerOrders, payment abstraction, reviews, admin dashboard/management.
+Authentication, seller profile completion and explicit application submission, seller approval, product CRUD, categories, images, browse/search, cart, checkout, orders/SellerOrders, payment abstraction, reviews, admin dashboard/management.
 
 ## Out of MVP
 Product Groups, automatic merging, AI search/recommendations, AI descriptions/image recognition, wishlist, following/social feed, messaging, coupons/loyalty/subscriptions, multi-language/currency, advanced shipping/analytics, microservices, Kafka, Kubernetes, Elasticsearch.

@@ -33,7 +33,7 @@ Read every file under `docs/` before implementing features. They define product 
 Do not invent undefined business rules. Ask when specifications conflict. Implement incrementally.
 
 ## Core Flow
-Seller registration → Admin approval → Product creation → Buyer discovery → Cart → Checkout → Payment → Order → Seller fulfillment → Buyer review.
+Seller registration → Store profile draft → Explicit submission for review → Admin approval → Product creation → Buyer discovery → Cart → Checkout → Payment → Order → Seller fulfillment → Buyer review.
 
 AI/search enhancements are planned for later phases and are not part of the MVP.
 
@@ -106,7 +106,9 @@ Run the backend tests from `backend/` with:
 pytest
 ```
 
-Auth uses a 15-minute signed access JWT and a rotating seven-day opaque refresh token in separate HttpOnly cookies. See [Authentication API](docs/05-api-specification.md#authentication) and [Authentication architecture](docs/06-architecture.md#authentication-and-authorization). The new refresh-token table is migration `0002_refresh_tokens`; after reviewing the target database, apply it from `backend/` with `alembic upgrade head`. Do not point test suites at a shared or production database.
+Auth uses a 15-minute signed access JWT and a rotating seven-day opaque refresh token in separate HttpOnly cookies. See [Authentication API](docs/05-api-specification.md#authentication) and [Authentication architecture](docs/06-architecture.md#authentication-and-authorization). Seller onboarding uses migration `0003_seller_onboarding` to add the DRAFT state and append-only status history; it preserves existing seller statuses. Review the target database before applying migrations from `backend/` with `alembic upgrade head`. Do not point test suites at a shared or production database.
+
+New sellers sign in after registration, complete their store profile, and explicitly submit it for review. Phase 4.1 implements the seller profile and submission flow; Admin review and decisions remain planned for Phase 4.2. The current schema reference is `docs/04-database-schema.sql`; `backend/alembic/schema.sql` remains the frozen input for the original `0001_initial_schema` migration.
 
 For routine refresh-token cleanup, run a dry run from `backend/` with `python -m app.modules.auth.cleanup_refresh_tokens --dry-run`, then schedule `python -m app.modules.auth.cleanup_refresh_tokens` through an external scheduler. It deletes expired records in bounded batches after a 30-day post-expiry retention period; no scheduler is installed by the application.
 

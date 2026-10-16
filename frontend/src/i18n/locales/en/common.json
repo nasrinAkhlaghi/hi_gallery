@@ -49,7 +49,7 @@
     "displayName": "Your name",
     "shopName": "Shop name",
     "registerAction": "Create account",
-    "sellerRegisterAction": "Submit seller registration",
+    "sellerRegisterAction": "Create seller account",
     "working": "Please wait…",
     "loading": "Loading your account…",
     "emailTaken": "An account with this email already exists.",
@@ -58,6 +58,7 @@
     "genericError": "We could not complete that request. Please try again.",
     "sellerPending": "Your seller account is awaiting approval.",
     "loginSuccess": "Your account was created. Sign in to continue.",
+    "sellerRegisteredLogin": "Your seller account is ready. Sign in to complete your store profile.",
     "logout": "Sign out"
   },
   "home": {
@@ -119,10 +120,55 @@
       "orders": "Orders",
       "shop": "Shop",
       "settings": "Settings",
+      "onboarding": "Store profile",
       "sellers": "Sellers",
       "buyers": "Buyers",
       "reviews": "Reviews",
       "reports": "Reports"
+    }
+  },
+  "sellerOnboarding": {
+    "eyebrow": "Seller onboarding",
+    "title": "Complete your store profile",
+    "loading": "Loading your store profile…",
+    "currentStatus": "Application status: {{status}}",
+    "profileTitle": "Store information",
+    "draftIntro": "Add the information buyers and reviewers need to understand your store. You can edit it until you submit for review.",
+    "shopName": "Shop name",
+    "description": "Store description (optional)",
+    "logoUrl": "Logo URL (optional)",
+    "save": "Save profile",
+    "saving": "Saving…",
+    "saved": "Your store profile was saved.",
+    "reviewTitle": "Ready for review?",
+    "reviewIntro": "Submit your completed store profile to the HI Gallery team for review.",
+    "saveBeforeSubmit": "Save your latest profile changes before submitting.",
+    "submit": "Submit for Review",
+    "confirmTitle": "Submit this store profile for review?",
+    "confirmDescription": "After submission, you can view your profile and status, but you cannot edit this application while it is under review.",
+    "confirmSubmit": "Confirm submission",
+    "submitting": "Submitting…",
+    "cancel": "Cancel",
+    "submitted": "Your application was submitted for review.",
+    "conflict": "Your application changed before this action completed. We refreshed its current status; review it and try again if appropriate.",
+    "forbidden": "This seller account cannot edit or submit its profile in its current state.",
+    "validationError": "Check the shop name and optional logo URL, then try again.",
+    "requestError": "We could not load or save your seller profile. Please try again.",
+    "status": {
+      "draft": "Draft",
+      "pending": "In review",
+      "active": "Approved",
+      "rejected": "Rejected",
+      "suspended": "Suspended",
+      "unknown": "Unknown"
+    },
+    "statusMessage": {
+      "draft": "Your profile is a draft. Save your details, then submit it when you are ready.",
+      "pending": "Your application is awaiting review. You can view its status and profile while it is pending.",
+      "active": "Your seller profile is active. Approved seller tools are available in Seller Studio.",
+      "rejected": "This application was rejected. Editing and resubmission will be handled in a later phase.",
+      "suspended": "Selling privileges for this account are suspended. You can view your profile and status.",
+      "unknown": "Your seller application status is unavailable."
     }
   }
 }

@@ -42,6 +42,8 @@ Distinct visual experience from shopping.
 Navigation:
 Dashboard, Products, Orders, Shop, Settings.
 
+Seller onboarding (Phase 4.1) uses the shared Seller layout at `/seller/onboarding`. Non-ACTIVE sellers see the onboarding destination instead of approved-only Seller Studio navigation. DRAFT sellers can edit shop name, optional description and optional logo URL, save the profile, and explicitly confirm “Submit for Review”. PENDING sellers can view their profile and application status but cannot edit or submit again. Show DRAFT and PENDING as distinct text states, with loading, success, validation, conflict, and error feedback. ACTIVE sellers retain the existing Seller Studio navigation and may view their profile. Admin review/decision screens are planned for Phase 4.2 and are not implemented here.
+
 Dashboard cards:
 - Active products
 - Pending orders

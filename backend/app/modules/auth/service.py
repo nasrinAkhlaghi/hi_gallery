@@ -31,7 +31,7 @@ from app.modules.auth.security import (
     verify_password,
 )
 from app.modules.buyer.models import Buyer
-from app.modules.seller.models import Seller
+from app.modules.seller.models import Seller, SellerStatusHistory
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +81,18 @@ def _create_account_profile(session: Session, email: str, password: str, profile
     profile.updated_at = now
     profile.account = account
     session.add(account)
+    if isinstance(profile, Seller):
+        session.add(
+            SellerStatusHistory(
+                seller_id=profile.id,
+                previous_status=None,
+                new_status=profile.status,
+                actor_account_id=account.id,
+                actor_type="SELLER",
+                action="SELLER_REGISTERED",
+                created_at=now,
+            )
+        )
     try:
         session.commit()
     except IntegrityError as exc:
@@ -100,7 +112,7 @@ def register_buyer(session: Session, request: BuyerRegistrationRequest) -> Curre
 def register_seller(session: Session, request: SellerRegistrationRequest) -> CurrentUserResponse:
     if repository.get_account_by_email(session, str(request.email)) is not None:
         raise DuplicateEmailError
-    seller = Seller(shop_name=request.shop_name, description=request.description, status="PENDING")
+    seller = Seller(shop_name=request.shop_name, description=request.description, status="DRAFT")
     return _create_account_profile(session, str(request.email), request.password, seller)
 
 

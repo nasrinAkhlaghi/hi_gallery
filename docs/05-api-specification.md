@@ -28,7 +28,7 @@ All paths below are under `/api/v1`. State-changing cookie-authenticated request
 {"email":"maker@example.com","password":"a-password-of-at-least-12-characters","shop_name":"Clay Studio","description":"Optional shop description"}
 ```
 
-Email is trimmed and case-normalized. Password length is 12–128 characters. Unknown fields are rejected. Seller registrations create only a SELLER profile in PENDING status; registration never accepts a role field or creates an ADMIN. Both endpoints return `201` and the current-user shape below. They do not return tokens or automatically sign the user in. Duplicate emails return `409 EMAIL_ALREADY_REGISTERED`.
+Email is trimmed and case-normalized. Password length is 12–128 characters. Unknown fields are rejected. Seller registration creates only a SELLER profile in `DRAFT`; it does not submit an application. Registration never accepts a role field or creates an ADMIN. Both endpoints return `201` and the current-user shape below. They do not return tokens or automatically sign the user in. Duplicate emails return `409 EMAIL_ALREADY_REGISTERED`.
 
 ### Login and cookies
 
@@ -42,7 +42,7 @@ All cookies use `SameSite=Lax`, omit the Domain attribute, and set `Secure` in p
 
 ### CSRF, refresh, logout
 
-`GET /auth/csrf` returns `{"csrf_token":"…"}` and sets the matching CSRF cookie. Keep the returned value in memory and send it as `X-CSRF-Token` for every mutation. After login or refresh, call this endpoint again; the CSRF value is bound to the current refresh credential (or access-token ID when no refresh cookie exists). The backend validates the cookie/header equality, signature, binding, and request origin where supplied.
+`GET /auth/csrf` returns `{"csrf_token":"…"}` and sets the matching CSRF cookie. Keep the returned value in memory and send it as `X-CSRF-Token` for every mutation. After login or refresh, call this endpoint again; the CSRF value is bound to the access-token ID when the access cookie is present, and falls back to the current refresh-token hash when no access cookie is sent. This keeps the value usable on seller API paths while preserving the refresh cookie's narrow `/api/v1/auth` path. The backend validates the cookie/header equality, signature, binding, and request origin where supplied.
 
 `POST /auth/refresh` has no JSON body. It rotates the refresh cookie, creates a new access JWT, and returns the current-user response. The server stores only a SHA-256 hash of each opaque refresh token. Concurrent refresh attempts are serialized with a row lock; a competing in-flight attempt receives `409 REFRESH_IN_PROGRESS` and must retry only after obtaining current cookie/CSRF state. Reuse of a consumed token revokes the whole token family and returns `401 REFRESH_TOKEN_INVALID`.
 
@@ -56,7 +56,7 @@ All cookies use `SameSite=Lax`, omit the Domain attribute, and set `Secure` in p
 {"id":"account-uuid","email":"user@example.com","roles":["BUYER"],"seller_status":null}
 ```
 
-Roles are derived from the existing Buyer, Seller, and Admin profile relationships. `seller_status` is null without a seller profile; new sellers report `PENDING`. Password hashes, token values, and security metadata are never included.
+Roles are derived from the existing Buyer, Seller, and Admin profile relationships. `seller_status` is null without a seller profile; new sellers report `DRAFT`. Password hashes, token values, and security metadata are never included.
 
 ### Refresh-token retention
 
@@ -77,6 +77,10 @@ The migration creates `refresh_tokens` with UUID identity/account/family referen
 - POST `/orders/{orderId}/reviews`
 
 ## Seller
+- GET `/seller/profile`
+- PATCH `/seller/profile`
+- GET `/seller/application`
+- POST `/seller/application/submit`
 - GET `/seller/dashboard`
 - GET `/seller/products`
 - POST `/seller/products`
@@ -88,6 +92,26 @@ The migration creates `refresh_tokens` with UUID identity/account/family referen
 - GET `/seller/orders`
 - GET `/seller/orders/{sellerOrderId}`
 - PATCH `/seller/orders/{sellerOrderId}/status`
+
+### Seller onboarding (Phase 4.1)
+
+All endpoints require an authenticated SELLER profile. State-changing requests use the documented CSRF cookie/header and Origin checks. Requests are scoped to the authenticated account; they never accept seller IDs or actor IDs from the client.
+
+`GET /seller/profile` returns `{ "id", "shop_name", "description", "logo_url", "status", "created_at", "updated_at" }` for the caller's seller profile.
+
+`PATCH /seller/profile` accepts only supplied editable fields from this set:
+
+```json
+{"shop_name":"Clay Studio","description":"Optional description","logo_url":"https://example.com/logo.png"}
+```
+
+`shop_name` must be nonblank and at most 150 characters. `description` is optional and at most 10,000 characters. `logo_url` is optional, at most 2,048 characters, and if present must be an absolute HTTP(S) URL. Unknown fields (including status, account and audit fields) are rejected. Editing is allowed only in `DRAFT`; a suspended seller receives `403`, and other non-draft profile edits receive `409`.
+
+`GET /seller/application` returns `{ "status", "can_edit", "can_submit" }`. During Phase 4.1 both flags are true only for `DRAFT`.
+
+`POST /seller/application/submit` accepts an empty body. It atomically changes `DRAFT` to `PENDING`, adds a `DRAFT` → `PENDING` seller lifecycle audit event, and returns the application status. Only a DRAFT can be submitted; duplicate or concurrent submissions return `409 INVALID_APPLICATION_TRANSITION`. Pending sellers may read profile and status but cannot edit or submit again. Rejected-seller editing/resubmission is planned for a later phase; Admin review and decision endpoints are not implemented in Phase 4.1.
+
+The seller status history is append-only. Phase 4.1 records seller registration (`NULL` → `DRAFT`) and application submission (`DRAFT` → `PENDING`) with actor type `SELLER` and identity derived from the authenticated account. The migration does not fabricate events for sellers that existed before it; historical PENDING rows remain PENDING and have no synthetic history.
 
 ## Admin
 - GET `/admin/dashboard`

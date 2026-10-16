@@ -103,6 +103,7 @@ describe("route layouts and navigation", () => {
     "/reviews",
     "/profile",
     "/seller",
+    "/seller/onboarding",
     "/seller/products",
     "/seller/orders",
     "/seller/shop",

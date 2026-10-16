@@ -9,10 +9,10 @@ from app.modules.orders.models import Order, OrderItem, SellerOrder
 from app.modules.payments.models import Payment
 from app.modules.products.models import Product, ProductImage
 from app.modules.reviews.models import Review
-from app.modules.seller.models import Seller
+from app.modules.seller.models import Seller, SellerStatusHistory
 
 __all__ = [
     "Account", "Admin", "Buyer", "Cart", "CartItem", "Category", "Order", "RefreshToken",
-    "OrderItem", "Payment", "Product", "ProductImage", "Review", "Seller",
+    "OrderItem", "Payment", "Product", "ProductImage", "Review", "Seller", "SellerStatusHistory",
     "SellerOrder",
 ]

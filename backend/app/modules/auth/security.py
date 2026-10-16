@@ -124,8 +124,6 @@ def verify_csrf_token(token: str, binding: str, settings: Settings) -> bool:
 
 
 def current_csrf_binding(refresh_token: str | None, access_token: str | None, settings: Settings) -> str:
-    if refresh_token:
-        return f"refresh:{hash_refresh_token(refresh_token)}"
     if access_token:
         try:
             claims = jwt.decode(
@@ -139,6 +137,8 @@ def current_csrf_binding(refresh_token: str | None, access_token: str | None, se
                 return f"access:{jti}"
         except (jwt.PyJWTError, ValueError, TypeError):
             pass
+    if refresh_token:
+        return f"refresh:{hash_refresh_token(refresh_token)}"
     return "anonymous"
 
 

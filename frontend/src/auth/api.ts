@@ -10,6 +10,22 @@ export type AuthUser = {
   seller_status: string | null;
 };
 
+export type SellerProfile = {
+  id: string;
+  shop_name: string;
+  description: string | null;
+  logo_url: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type SellerApplication = {
+  status: string;
+  can_edit: boolean;
+  can_submit: boolean;
+};
+
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string) {
     super(message);
@@ -107,6 +123,24 @@ export async function registerSeller(values: { email: string; password: string; 
   return apiRequest<AuthUser>("/auth/register/seller", {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(values),
   });
+}
+
+export async function getSellerProfile(): Promise<SellerProfile> {
+  return apiRequest<SellerProfile>("/seller/profile");
+}
+
+export async function updateSellerProfile(values: Pick<SellerProfile, "shop_name" | "description" | "logo_url">): Promise<SellerProfile> {
+  return apiRequest<SellerProfile>("/seller/profile", {
+    method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(values),
+  });
+}
+
+export async function getSellerApplication(): Promise<SellerApplication> {
+  return apiRequest<SellerApplication>("/seller/application");
+}
+
+export async function submitSellerApplication(): Promise<SellerApplication> {
+  return apiRequest<SellerApplication>("/seller/application/submit", { method: "POST" });
 }
 
 export async function logout(): Promise<void> {

@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowDownRight, ArrowUpRight, Flower2, Heart, Menu, Search, X } from "lucide-react";
-import { BrowserRouter, Link, Route, Routes, useParams } from "react-router-dom";
+import { BrowserRouter, Link, Navigate, Route, Routes, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
 import { BuyerRoutePlaceholder, RoutePlaceholder, WorkspaceLayout } from "./components/RoutePlaceholder";
 import { AuthProvider } from "./auth/AuthContext";
 import { AuthControls } from "./auth/AuthControls";
 import { LoginPage, RegistrationPage, RequireAuth } from "./auth/AuthPages";
+import { useAuth } from "./auth/AuthContext";
+import { SellerOnboardingPage } from "./seller/SellerOnboardingPage";
 
 const categories = ["ceramics", "textiles", "jewelry", "homeObjects"] as const;
 
@@ -165,6 +167,12 @@ function ProductPlaceholder() {
   return <BuyerRoutePlaceholder titleKey="pages.productDetails" descriptionKey="pages.productDescription" descriptionOptions={{ id: `\u2068${id ?? ""}\u2069` }} />;
 }
 
+function SellerWorkspaceIndex() {
+  const { user } = useAuth();
+  if (user?.seller_status !== "ACTIVE") return <Navigate to="/seller/onboarding" replace />;
+  return <RoutePlaceholder titleKey="pages.dashboard" />;
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -182,12 +190,13 @@ function App() {
         <Route path="/orders" element={<RequireAuth><BuyerRoutePlaceholder titleKey="pages.orders" /></RequireAuth>} />
         <Route path="/reviews" element={<BuyerRoutePlaceholder titleKey="pages.reviews" />} />
         <Route path="/profile" element={<RequireAuth><BuyerRoutePlaceholder titleKey="pages.profile" /></RequireAuth>} />
-        <Route path="/seller" element={<RequireAuth role="SELLER" activeSeller><WorkspaceLayout area="seller" /></RequireAuth>}>
-          <Route index element={<RoutePlaceholder titleKey="pages.dashboard" />} />
-          <Route path="products" element={<RoutePlaceholder titleKey="pages.products" />} />
-          <Route path="orders" element={<RoutePlaceholder titleKey="pages.orders" />} />
-          <Route path="shop" element={<RoutePlaceholder titleKey="pages.shop" />} />
-          <Route path="settings" element={<RoutePlaceholder titleKey="pages.settings" />} />
+        <Route path="/seller" element={<RequireAuth role="SELLER"><WorkspaceLayout area="seller" /></RequireAuth>}>
+          <Route index element={<SellerWorkspaceIndex />} />
+          <Route path="onboarding" element={<SellerOnboardingPage />} />
+          <Route path="products" element={<RequireAuth activeSeller><RoutePlaceholder titleKey="pages.products" /></RequireAuth>} />
+          <Route path="orders" element={<RequireAuth activeSeller><RoutePlaceholder titleKey="pages.orders" /></RequireAuth>} />
+          <Route path="shop" element={<RequireAuth activeSeller><RoutePlaceholder titleKey="pages.shop" /></RequireAuth>} />
+          <Route path="settings" element={<RequireAuth activeSeller><RoutePlaceholder titleKey="pages.settings" /></RequireAuth>} />
         </Route>
         <Route path="/admin" element={<RequireAuth role="ADMIN"><WorkspaceLayout area="admin" /></RequireAuth>}>
           <Route index element={<RoutePlaceholder titleKey="pages.dashboard" />} />

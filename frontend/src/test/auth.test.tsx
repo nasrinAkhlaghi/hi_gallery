@@ -80,7 +80,7 @@ describe("frontend authentication", () => {
       if (path.endsWith("/auth/register/seller")) {
         submittedPath = path;
         submittedBody = String(init?.body);
-        return json({ ...user, roles: ["SELLER"], seller_status: "PENDING" }, 201);
+        return json({ ...user, roles: ["SELLER"], seller_status: "DRAFT" }, 201);
       }
       return json({}, 401);
     });
@@ -89,8 +89,8 @@ describe("frontend authentication", () => {
     fireEvent.change(await screen.findByRole("textbox", { name: "Email address" }), { target: { value: "maker@example.com" } });
     fireEvent.change(screen.getByRole("textbox", { name: "Shop name" }), { target: { value: "Clay Studio" } });
     fireEvent.change(screen.getByLabelText(/Password/), { target: { value: "correct-horse-12" } });
-    fireEvent.click(screen.getByRole("button", { name: "Submit seller registration" }));
-    expect(await screen.findByText("Your account was created. Sign in to continue.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Create seller account" }));
+    expect(await screen.findByText("Your seller account is ready. Sign in to complete your store profile.")).toBeInTheDocument();
     expect(submittedPath).toContain("/auth/register/seller");
     expect(JSON.parse(submittedBody)).toMatchObject({ shop_name: "Clay Studio" });
   });
@@ -143,15 +143,19 @@ describe("frontend authentication", () => {
     expect(await screen.findByRole("heading", { name: "Welcome back" })).toBeInTheDocument();
   });
 
-  it("blocks pending sellers and non-admin users from privileged workspace routes", async () => {
+  it("routes pending sellers to status view instead of approved-only workspace pages", async () => {
     mockFetch((path) => {
       if (path.endsWith("/auth/csrf")) return json({ csrf_token: "csrf" });
       if (path.endsWith("/auth/me")) return json({ ...user, roles: ["SELLER"], seller_status: "PENDING" });
+      if (path.endsWith("/seller/profile")) return json({ id: "seller-id", shop_name: "Clay Studio", description: null, logo_url: null, status: "PENDING", created_at: "2025-01-01T00:00:00Z", updated_at: "2025-01-01T00:00:00Z" });
+      if (path.endsWith("/seller/application")) return json({ status: "PENDING", can_edit: false, can_submit: false });
       return json({}, 401);
     });
     window.history.replaceState(null, "", "/seller");
     render(<App />);
-    expect(await screen.findByText("Your seller account is awaiting approval.")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Complete your store profile" })).toBeInTheDocument();
+    expect(screen.getByText("Application status: In review")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Products" })).not.toBeInTheDocument();
   });
 
   it("deduplicates simultaneous refreshes and retries each original request only once", async () => {

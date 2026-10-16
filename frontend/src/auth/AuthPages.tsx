@@ -39,9 +39,13 @@ export function LoginPage() {
     setError("");
     setBusy(true);
     try {
-      setUser(await login(email, password));
+      const authenticatedUser = await login(email, password);
+      setUser(authenticatedUser);
       const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
-      navigate(from || "/profile", { replace: true });
+      const destination = authenticatedUser.roles.includes("SELLER")
+        ? authenticatedUser.seller_status === "ACTIVE" ? "/seller" : "/seller/onboarding"
+        : from || "/profile";
+      navigate(destination, { replace: true });
     } catch (caught) {
       setError(errorKey(caught));
     } finally {
@@ -50,7 +54,7 @@ export function LoginPage() {
   }
 
   return <AuthFrame><h1 className="font-display text-3xl">{t("auth.loginTitle")}</h1><p className="mt-2 text-sm text-muted-foreground">{t("auth.loginIntro")}</p>
-    {searchParams.get("registered") === "1" && <p role="status" className="mt-4 text-sm text-primary">{t("auth.loginSuccess")}</p>}
+    {searchParams.get("registered") && <p role="status" className="mt-4 text-sm text-primary">{t(searchParams.get("registered") === "seller" ? "auth.sellerRegisteredLogin" : "auth.loginSuccess")}</p>}
     <form className="mt-7 space-y-5" onSubmit={submit}>
       <label className="block text-sm">{t("auth.email")}<input dir="ltr" autoComplete="email" type="email" required maxLength={255} value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 min-h-11 w-full rounded-lg border border-border bg-background px-3" /></label>
       <label className="block text-sm">{t("auth.password")}<input dir="ltr" autoComplete="current-password" type="password" required maxLength={128} value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 min-h-11 w-full rounded-lg border border-border bg-background px-3" /></label>
@@ -77,7 +81,7 @@ export function RegistrationPage({ seller = false }: { seller?: boolean }) {
     try {
       if (seller) await registerSeller({ email, password, shop_name: name });
       else await registerBuyer({ email, password, display_name: name });
-      navigate("/login?registered=1", { replace: true });
+      navigate(seller ? "/login?registered=seller" : "/login?registered=1", { replace: true });
     } catch (caught) {
       setError(errorKey(caught));
     } finally {
@@ -105,6 +109,6 @@ export function RequireAuth({ children, role, activeSeller = false }: { children
   if (loading) return <main className="grid min-h-screen place-items-center text-sm text-muted-foreground" role="status">{t("auth.loading")}</main>;
   if (!user) return <Navigate to="/login" replace state={{ from: location }} />;
   if (role && !user.roles.includes(role)) return <Navigate to="/profile" replace />;
-  if (activeSeller && user.seller_status !== "ACTIVE") return <AuthFrame><p>{t("auth.sellerPending")}</p></AuthFrame>;
+  if (activeSeller && user.seller_status !== "ACTIVE") return <Navigate to="/seller/onboarding" replace state={{ from: location }} />;
   return children;
 }

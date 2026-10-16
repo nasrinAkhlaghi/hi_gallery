@@ -10,6 +10,7 @@ from starlette import status
 
 from app.core.config import get_settings
 from app.modules.auth.router import router as auth_router
+from app.modules.seller.router import router as seller_router
 
 # Validate required configuration before the application begins serving requests.
 get_settings()
@@ -25,6 +26,7 @@ app.add_middleware(
     allow_headers=["Content-Type", "X-CSRF-Token"],
 )
 app.include_router(auth_router)
+app.include_router(seller_router)
 
 
 def _error_body(code: str, message: str, details: object = None) -> dict[str, object]:
