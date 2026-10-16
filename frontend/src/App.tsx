@@ -122,10 +122,10 @@ function HomePage() {
           <h1 className="max-w-xl font-display text-4xl leading-[1.07] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">{t("home.titleLineOne")}<br />{t("home.titleLineTwo")} <span className="font-serif italic text-primary">{t("home.titleHighlight")}</span><br />{t("home.titleLineThree")}</h1>
           <p className="mt-7 max-w-md text-base leading-7 text-muted-foreground">{t("home.description")}</p>
           <div className="mt-9 flex flex-wrap items-center gap-4">
-            <a className="inline-flex items-center gap-3 rounded-full bg-primary px-6 py-3.5 text-sm font-medium text-primary-foreground transition hover:opacity-90" href="#discover">{t("actions.exploreGallery")} <ArrowUpRight size={16} /></a>
+            <a className="inline-flex items-center gap-3 rounded-full bg-primary px-6 py-3.5 text-sm font-medium text-primary-foreground transition hover:opacity-90" href="#discover">{t("actions.exploreGallery")} <ArrowUpRight className="rtl:-scale-x-100" size={16} /></a>
             <span className="text-xs text-muted-foreground">{t("home.supportingLine")}</span>
           </div>
-          <div className="mt-14 flex items-center gap-4 border-t border-border pt-6 text-xs text-muted-foreground"><span className="font-serif text-2xl italic text-foreground">01</span><span>{t("home.makerStatement")}</span><ArrowDownRight size={15} className="ms-auto" /></div>
+          <div className="mt-14 flex items-center gap-4 border-t border-border pt-6 text-xs text-muted-foreground"><span className="font-serif text-2xl italic text-foreground">01</span><span>{t("home.makerStatement")}</span><ArrowDownRight size={15} className="ms-auto rtl:-scale-x-100" /></div>
         </div>
         <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
           <div className="aspect-[0.92] overflow-hidden rounded-[48%_48%_8px_8px] rtl:rounded-[48%_48%_48%_8px] bg-[#d6b896]">
@@ -141,7 +141,7 @@ function HomePage() {
       <section id="categories" className="border-y border-border bg-[#f1ede5]">
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-12 lg:py-16">
           <div className="mb-7 flex items-end justify-between"><div><p className="text-xs uppercase tracking-[0.18em] text-primary">{t("home.categoriesEyebrow")}</p><h2 className="mt-2 font-display text-3xl tracking-tight">{t("home.categoriesTitle")}</h2></div><a href="#discover" className="hidden text-sm underline underline-offset-4 sm:block">{t("actions.viewAll")}</a></div>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">{categories.map((category, index) => <a key={category} href="#discover" className="group flex min-h-28 items-end justify-between rounded-2xl bg-background p-5 transition hover:-translate-y-1 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"><span><span className="mb-3 block text-xs text-muted-foreground">0{index + 1}</span><span className="font-display text-lg">{t(`categories.${category}`)}</span></span><ArrowUpRight size={17} className="text-muted-foreground transition group-hover:text-primary" /></a>)}</div>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">{categories.map((category, index) => <a key={category} href="#discover" className="group flex min-h-28 items-end justify-between rounded-2xl bg-background p-5 transition hover:-translate-y-1 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"><span><span className="mb-3 block text-xs text-muted-foreground">0{index + 1}</span><span className="font-display text-lg">{t(`categories.${category}`)}</span></span><ArrowUpRight size={17} className="text-muted-foreground transition group-hover:text-primary rtl:-scale-x-100" /></a>)}</div>
         </div>
       </section>
 
