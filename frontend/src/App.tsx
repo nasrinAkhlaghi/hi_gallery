@@ -173,14 +173,14 @@ function App() {
         <Route path="/orders" element={<BuyerRoutePlaceholder titleKey="pages.orders" />} />
         <Route path="/reviews" element={<BuyerRoutePlaceholder titleKey="pages.reviews" />} />
         <Route path="/profile" element={<BuyerRoutePlaceholder titleKey="pages.profile" />} />
-        <Route path="/seller" element={<WorkspaceLayout area="Seller Studio" />}>
+        <Route path="/seller" element={<WorkspaceLayout area="seller" />}>
           <Route index element={<RoutePlaceholder titleKey="pages.dashboard" />} />
           <Route path="products" element={<RoutePlaceholder titleKey="pages.products" />} />
           <Route path="orders" element={<RoutePlaceholder titleKey="pages.orders" />} />
           <Route path="shop" element={<RoutePlaceholder titleKey="pages.shop" />} />
           <Route path="settings" element={<RoutePlaceholder titleKey="pages.settings" />} />
         </Route>
-        <Route path="/admin" element={<WorkspaceLayout area="Admin Console" />}>
+        <Route path="/admin" element={<WorkspaceLayout area="admin" />}>
           <Route index element={<RoutePlaceholder titleKey="pages.dashboard" />} />
           <Route path="sellers" element={<RoutePlaceholder titleKey="pages.sellers" />} />
           <Route path="buyers" element={<RoutePlaceholder titleKey="pages.buyers" />} />

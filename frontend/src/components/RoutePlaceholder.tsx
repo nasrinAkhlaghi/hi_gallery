@@ -1,4 +1,6 @@
-import { Link, Outlet } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Menu, X } from "lucide-react";
+import { Link, NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
@@ -29,25 +31,115 @@ export function BuyerRoutePlaceholder(props: Omit<RoutePlaceholderProps, "showLa
   return <RoutePlaceholder {...props} showLanguageSwitcher />;
 }
 
-const sellerLinks = ["", "products", "orders", "shop", "settings"];
-const adminLinks = ["", "sellers", "buyers", "products", "orders", "reviews", "reports"];
+type WorkspaceArea = "seller" | "admin";
 
-export function WorkspaceLayout({ area }: { area: "Seller Studio" | "Admin Console" }) {
+const sellerLinks = ["dashboard", "products", "orders", "shop", "settings"] as const;
+const adminLinks = ["dashboard", "sellers", "buyers", "products", "orders", "reviews", "reports"] as const;
+
+function WorkspaceNavigationLinks({
+  area,
+  mobile = false,
+  onNavigate,
+}: {
+  area: WorkspaceArea;
+  mobile?: boolean;
+  onNavigate?: () => void;
+}) {
   const { t } = useTranslation();
-  const basePath = area === "Seller Studio" ? "/seller" : "/admin";
-  const links = area === "Seller Studio" ? sellerLinks : adminLinks;
-  const areaLabel = area === "Seller Studio" ? t("workspace.sellerStudio") : t("workspace.adminConsole");
+  const basePath = `/${area}`;
+  const links = area === "seller" ? sellerLinks : adminLinks;
+
+  return links.map((page) => {
+    const to = page === "dashboard" ? basePath : `${basePath}/${page}`;
+
+    return (
+      <NavLink
+        key={page}
+        to={to}
+        end={page === "dashboard"}
+        onClick={onNavigate}
+        className={({ isActive }) =>
+          `${mobile ? "flex min-h-11 items-center rounded-lg px-3" : "py-2"} transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary ${
+            isActive
+              ? "font-medium text-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`
+        }
+      >
+        {t(`workspace.navigation.${page}`)}
+      </NavLink>
+    );
+  });
+}
+
+export function WorkspaceLayout({ area }: { area: WorkspaceArea }) {
+  const { t } = useTranslation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const mobileNavigationRef = useRef<HTMLElement>(null);
+  const areaLabel = t(area === "seller" ? "workspace.sellerStudio" : "workspace.adminConsole");
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+        mobileMenuButtonRef.current?.focus();
+      }
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!(event.target instanceof Node)) return;
+      if (
+        !mobileNavigationRef.current?.contains(event.target) &&
+        !mobileMenuButtonRef.current?.contains(event.target)
+      ) {
+        setMobileMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [mobileMenuOpen]);
 
   return (
     <div className="min-h-screen bg-[#f8f5ef] text-foreground">
       <header className="border-b border-border px-6 py-5">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4">
-          <div><Link to="/" className="text-sm text-primary">{t("app.name")}</Link><h1 className="mt-1 font-display text-xl">{areaLabel}</h1></div>
-          <nav aria-label={t("workspace.navigationLabel", { area: areaLabel })} className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-            {links.map((path) => {
-              const label = path ? t(`pages.${path}`) : t("pages.dashboard");
-              return <Link key={path || "dashboard"} to={path ? `${basePath}/${path}` : basePath} className="text-muted-foreground hover:text-foreground">{label}</Link>;
-            })}
+          <div>
+            <Link to="/" dir="ltr" className="text-sm text-primary">{t("app.name")}</Link>
+            <h1 className="mt-1 font-display text-xl">{areaLabel}</h1>
+          </div>
+          <nav aria-label={t("workspace.navigationLabel", { area: areaLabel })} className="hidden items-center gap-x-5 text-sm md:flex">
+            <WorkspaceNavigationLinks area={area} />
+          </nav>
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher className="hidden md:block" />
+            <button
+              ref={mobileMenuButtonRef}
+              type="button"
+              className="grid h-11 w-11 place-items-center rounded-full border border-border focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary md:hidden"
+              aria-label={t(mobileMenuOpen ? "workspace.closeMenu" : "workspace.openMenu", { area: areaLabel })}
+              aria-expanded={mobileMenuOpen}
+              aria-controls={`${area}-mobile-navigation`}
+              onClick={() => setMobileMenuOpen((open) => !open)}
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+          <nav
+            ref={mobileNavigationRef}
+            id={`${area}-mobile-navigation`}
+            aria-label={t("workspace.navigationLabel", { area: areaLabel })}
+            className={`${mobileMenuOpen ? "flex" : "hidden"} order-last w-full flex-col gap-1 rounded-2xl border border-border bg-background p-2 text-sm shadow-md md:hidden`}
+          >
+            <WorkspaceNavigationLinks area={area} mobile onNavigate={() => setMobileMenuOpen(false)} />
+            <LanguageSwitcher className="mt-1 w-full" onLanguageChange={() => setMobileMenuOpen(false)} />
           </nav>
         </div>
       </header>

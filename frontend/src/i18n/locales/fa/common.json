@@ -77,6 +77,19 @@
   "workspace": {
     "sellerStudio": "فضای فروشنده",
     "adminConsole": "پنل مدیریت",
-    "navigationLabel": "ناوبری {{area}}"
+    "navigationLabel": "ناوبری {{area}}",
+    "openMenu": "باز کردن منوی {{area}}",
+    "closeMenu": "بستن منوی {{area}}",
+    "navigation": {
+      "dashboard": "داشبورد",
+      "products": "محصولات",
+      "orders": "سفارش‌ها",
+      "shop": "فروشگاه",
+      "settings": "تنظیمات",
+      "sellers": "فروشندگان",
+      "buyers": "خریداران",
+      "reviews": "دیدگاه‌ها",
+      "reports": "گزارش‌ها"
+    }
   }
 }

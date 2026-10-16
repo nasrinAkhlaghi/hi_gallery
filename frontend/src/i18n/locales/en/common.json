@@ -77,6 +77,19 @@
   "workspace": {
     "sellerStudio": "Seller Studio",
     "adminConsole": "Admin Console",
-    "navigationLabel": "{{area}} navigation"
+    "navigationLabel": "{{area}} navigation",
+    "openMenu": "Open {{area}} menu",
+    "closeMenu": "Close {{area}} menu",
+    "navigation": {
+      "dashboard": "Dashboard",
+      "products": "Products",
+      "orders": "Orders",
+      "shop": "Shop",
+      "settings": "Settings",
+      "sellers": "Sellers",
+      "buyers": "Buyers",
+      "reviews": "Reviews",
+      "reports": "Reports"
+    }
   }
 }
