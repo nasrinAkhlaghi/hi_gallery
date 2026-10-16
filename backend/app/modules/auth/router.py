@@ -201,5 +201,9 @@ def logout(request: Request, response: Response, session: DbSession) -> Response
 
 
 @router.get("/me", response_model=CurrentUserResponse)
-def get_me(account: Annotated[Account, Depends(get_current_account)]) -> CurrentUserResponse:
+def get_me(
+    response: Response,
+    account: Annotated[Account, Depends(get_current_account)],
+) -> CurrentUserResponse:
+    response.headers["Cache-Control"] = "no-store"
     return current_user_response(account)

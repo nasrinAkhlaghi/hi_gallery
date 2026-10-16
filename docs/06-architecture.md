@@ -96,7 +96,7 @@ The access JWT and refresh credential are held only in separate HttpOnly cookies
 
 Refresh credentials are cryptographically random opaque values. PostgreSQL stores only SHA-256 hashes in `refresh_tokens`, grouped by a UUID family. Each successful refresh consumes one token and links it to its successor in one transaction. Row locking with `NOWAIT` allows at most one concurrent refresh to win; a competing request gets `409 REFRESH_IN_PROGRESS`. Presenting a consumed token after a committed rotation is treated as reuse and revokes the full family. Logout revokes the current token or family and clears cookies. Access JWTs are stateless, so logout/family revocation does not immediately revoke already issued access JWTs; account status and roles are still loaded from PostgreSQL on protected requests, and the token expires within 15 minutes.
 
-Roles come only from the existing Buyer, Seller, and Admin profile relationships. Public registration can create Buyer or PENDING Seller profiles only. Reusable FastAPI dependencies return 401 for absent/invalid authentication and 403 for missing roles or a seller who is not ACTIVE. Frontend route guards are only a user-experience feature; authorization must also be enforced by backend route dependencies. No general session table, Redis, refresh-token cleanup scheduler, or business endpoints are introduced. Operators should schedule bounded deletion of refresh-token rows whose expiry is over 30 days old, preserving a defined post-expiry reuse-detection window.
+Roles come only from the existing Buyer, Seller, and Admin profile relationships. Public registration can create Buyer or PENDING Seller profiles only. Reusable FastAPI dependencies return 401 for absent/invalid authentication and 403 for missing roles or a seller who is not ACTIVE. Frontend route guards are only a user-experience feature; authorization must also be enforced by backend route dependencies. No general session table, Redis, refresh-token cleanup scheduler, or business endpoints are introduced. Operators can run `python -m app.modules.auth.cleanup_refresh_tokens --dry-run` from `backend/` to count eligible rows, then schedule `python -m app.modules.auth.cleanup_refresh_tokens` externally. Cleanup deletes at most 500 rows per transaction by default (up to 5,000 when explicitly configured) after `expires_at` is more than 30 days old, preserving a 30-day post-expiry reuse-detection window and never deleting an unexpired token. This bounds old records after expiry; replays later than the retention window cannot be associated with their former family.
 
 ### Current security limitations
 
@@ -104,7 +104,7 @@ Roles come only from the existing Buyer, Seller, and Admin profile relationships
 - Access JWTs remain valid until their 15-minute expiry after logout or family revocation; there is no access-token denylist.
 - Signing-key rotation is an operator-managed deployment action and invalidates outstanding tokens signed with the previous key.
 - CSRF protection does not defend against same-origin script injection; the CSRF value is intentionally available to frontend JavaScript, while auth tokens remain HttpOnly.
-- The refresh-row cleanup job is documented but not scheduled by the application.
+- The refresh-row cleanup command is operator-scheduled, not run by the application. Reuse detection is limited to the 30-day post-expiry retention window.
 - PostgreSQL lock behavior is covered by an opt-in test requiring a separate isolated database; that integration test is skipped in the default test run.
 
 ## AI

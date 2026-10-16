@@ -60,7 +60,7 @@ Roles are derived from the existing Buyer, Seller, and Admin profile relationshi
 
 ### Refresh-token retention
 
-The migration creates `refresh_tokens` with UUID identity/account/family references, a unique token hash, creation/expiry/revocation timestamps, a replacement-token link, and reuse-detection timestamp. No plaintext refresh token is stored. Schedule a bounded cleanup job to delete rows whose `expires_at` is more than 30 days in the past, in small batches, after verifying the configured retention meets operational audit needs. This keeps expired/revoked records bounded while preserving a 30-day post-expiry reuse-detection window. No cleanup scheduler is included in this phase.
+The migration creates `refresh_tokens` with UUID identity/account/family references, a unique token hash, creation/expiry/revocation timestamps, a replacement-token link, and reuse-detection timestamp. No plaintext refresh token is stored. Run a dry run with `python -m app.modules.auth.cleanup_refresh_tokens --dry-run` from `backend/`, then run `python -m app.modules.auth.cleanup_refresh_tokens` periodically through an external scheduler. The command deletes rows in transactions of at most 500 rows by default (configurable up to 5,000) when `expires_at` is more than 30 days in the past; it never deletes an unexpired token. Each batch commits separately, so runs are repeatable and hold locks only for a bounded batch. Reuse detection is retained for 30 days after a token expires; a token replay after that window cannot be associated with its former family once its row is removed. No scheduler is installed by the application.
 
 ## Buyer
 - GET `/products`

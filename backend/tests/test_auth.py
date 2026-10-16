@@ -200,6 +200,7 @@ def test_login_sets_securely_scoped_http_only_cookies_and_current_user(auth_clie
 
     me = client.get(f"{AUTH}/me")
     assert me.status_code == 200
+    assert me.headers["cache-control"] == "no-store"
     assert me.json() == {
         "id": user_id,
         "email": "buyer@example.com",
@@ -437,7 +438,7 @@ def test_missing_authentication_returns_401_and_pending_seller_is_denied_active_
     or os.getenv("TEST_DATABASE_URL") == os.getenv("DATABASE_URL"),
     reason="requires a separate PostgreSQL database explicitly marked TEST_DATABASE_ISOLATED=1",
 )
-def test_concurrent_refresh_has_at_most_one_successor() -> None:
+def test_concurrent_refresh_has_at_most_one_successor(monkeypatch) -> None:
     """PostgreSQL-only locking test; never connects to DATABASE_URL or the shared development DB."""
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
@@ -489,10 +490,65 @@ def test_concurrent_refresh_has_at_most_one_successor() -> None:
     try:
         with ThreadPoolExecutor(max_workers=2) as pool:
             results = list(pool.map(lambda _: attempt_refresh(), range(2)))
-        assert sum(result is not None and result.session is not None for result in results) <= 1
+        successes = [result for result in results if result is not None and result.session is not None]
+        assert len(successes) == 1
         with sessions() as session:
             family = session.scalars(select(RefreshToken).where(RefreshToken.family_id == family_id)).all()
-            assert len(family) <= 2
+            assert len(family) == 2
+            original = next(record for record in family if record.token_hash == hash_refresh_token(raw))
+            successor = next(record for record in family if record.id == original.replacement_token_id)
+            assert original.revoked_at is not None
+            assert successor.account_id == account_id
+            assert successor.family_id == family_id
+
+        # A replay after a committed rotation revokes every row in the affected family.
+        with sessions() as session:
+            replay = refresh_session(session, raw)
+            assert replay.error == "reused"
+        with sessions() as session:
+            family = session.scalars(select(RefreshToken).where(RefreshToken.family_id == family_id)).all()
+            assert all(record.revoked_at is not None for record in family)
+            assert any(record.reuse_detected_at is not None for record in family)
+
+        # An exception after the successor is flushed must roll the whole rotation back.
+        rollback_account_id = uuid4()
+        rollback_family_id = uuid4()
+        rollback_raw = os.urandom(48).hex()
+        with sessions.begin() as session:
+            session.add(
+                Account(
+                    id=rollback_account_id,
+                    email=f"rollback-{rollback_account_id}@example.com",
+                    password_hash="unused",
+                )
+            )
+            session.flush()
+            session.add(
+                RefreshToken(
+                    id=uuid4(),
+                    account_id=rollback_account_id,
+                    token_hash=hash_refresh_token(rollback_raw),
+                    family_id=rollback_family_id,
+                    created_at=now,
+                    expires_at=now + timedelta(days=7),
+                )
+            )
+
+        import app.modules.auth.service as auth_service
+
+        def fail_access_token_creation(*args, **kwargs):
+            raise RuntimeError("injected failure after successor flush")
+
+        monkeypatch.setattr(auth_service, "create_access_token", fail_access_token_creation)
+        with sessions() as session, pytest.raises(RuntimeError, match="injected failure"):
+            refresh_session(session, rollback_raw)
+        with sessions() as session:
+            rollback_family = session.scalars(
+                select(RefreshToken).where(RefreshToken.family_id == rollback_family_id)
+            ).all()
+            assert len(rollback_family) == 1
+            assert rollback_family[0].revoked_at is None
+            assert rollback_family[0].replacement_token_id is None
     finally:
         with engine.begin() as connection:
             connection.execute(text(f'DROP SCHEMA "{schema_name}" CASCADE'))

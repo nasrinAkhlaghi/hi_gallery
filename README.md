@@ -108,6 +108,8 @@ pytest
 
 Auth uses a 15-minute signed access JWT and a rotating seven-day opaque refresh token in separate HttpOnly cookies. See [Authentication API](docs/05-api-specification.md#authentication) and [Authentication architecture](docs/06-architecture.md#authentication-and-authorization). The new refresh-token table is migration `0002_refresh_tokens`; after reviewing the target database, apply it from `backend/` with `alembic upgrade head`. Do not point test suites at a shared or production database.
 
+For routine refresh-token cleanup, run a dry run from `backend/` with `python -m app.modules.auth.cleanup_refresh_tokens --dry-run`, then schedule `python -m app.modules.auth.cleanup_refresh_tokens` through an external scheduler. It deletes expired records in bounded batches after a 30-day post-expiry retention period; no scheduler is installed by the application.
+
 ### Start the frontend
 
 In a separate terminal, from the repository root:
