@@ -135,6 +135,10 @@ export function SellerOnboardingPage() {
           <section className="mb-7 rounded-2xl border border-border bg-background p-5 sm:p-7">
             <h3 className="font-display text-xl">{t("sellerOnboarding.profileTitle")}</h3>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">{t(isDraft ? "sellerOnboarding.draftIntro" : `sellerOnboarding.statusMessage.${status.toLowerCase()}`)}</p>
+            {status === "REJECTED" && application.rejection_reason && <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4" role="status">
+              <h4 className="font-medium">{t("sellerOnboarding.rejectionReason")}</h4>
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{application.rejection_reason}</p>
+            </div>}
             <form className="mt-6 space-y-5" onSubmit={saveProfile}>
               <label className="block text-sm font-medium">
                 {t("sellerOnboarding.shopName")}

@@ -9,6 +9,7 @@ import { AuthControls } from "./auth/AuthControls";
 import { LoginPage, RegistrationPage, RequireAuth } from "./auth/AuthPages";
 import { useAuth } from "./auth/AuthContext";
 import { SellerOnboardingPage } from "./seller/SellerOnboardingPage";
+import { AdminSellerDetailPage, AdminSellerListPage } from "./admin/AdminSellerReviewPage";
 
 const categories = ["ceramics", "textiles", "jewelry", "homeObjects"] as const;
 
@@ -200,7 +201,8 @@ function App() {
         </Route>
         <Route path="/admin" element={<RequireAuth role="ADMIN"><WorkspaceLayout area="admin" /></RequireAuth>}>
           <Route index element={<RoutePlaceholder titleKey="pages.dashboard" />} />
-          <Route path="sellers" element={<RoutePlaceholder titleKey="pages.sellers" />} />
+          <Route path="sellers" element={<AdminSellerListPage />} />
+          <Route path="sellers/:sellerId" element={<AdminSellerDetailPage />} />
           <Route path="buyers" element={<RoutePlaceholder titleKey="pages.buyers" />} />
           <Route path="products" element={<RoutePlaceholder titleKey="pages.products" />} />
           <Route path="orders" element={<RoutePlaceholder titleKey="pages.orders" />} />

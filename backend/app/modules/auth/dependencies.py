@@ -82,3 +82,10 @@ def require_roles(*roles: Role, active_seller: bool = False) -> Callable[..., Ac
         return account
 
     return role_dependency
+
+
+def require_active_admin(account: Annotated[Account, Depends(get_current_account)]) -> Account:
+    """Require an active Admin profile, not merely an Admin relationship."""
+    if account.admin is None or account.admin.status != "ACTIVE":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"code": "ACTIVE_ADMIN_REQUIRED"})
+    return account

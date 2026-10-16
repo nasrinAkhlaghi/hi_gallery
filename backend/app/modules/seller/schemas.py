@@ -65,3 +65,4 @@ class SellerApplicationResponse(BaseModel):
     status: str
     can_edit: bool
     can_submit: bool
+    rejection_reason: str | None = None

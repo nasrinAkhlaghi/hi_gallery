@@ -3,7 +3,7 @@
 ## Authentication
 Buyer: Register → Account → Buyer Profile → Login → Buyer Home.
 Seller: Register → DRAFT store profile → Edit shop name and optional description/logo URL → Explicitly submit for review → PENDING → (Phase 4.2 Admin decision) ACTIVE or REJECTED → ACTIVE sellers use Seller Studio.
-Admin: Login → Admin Console.
+Admin: Login → Admin Console → Seller applications (default PENDING queue) → Inspect profile/history → Confirm approval or reject with a required reason. Only authenticated accounts with an ACTIVE Admin profile can make review requests. Each successful decision is audited atomically. Rejected sellers can view the reason; editing and resubmission remain future work.
 
 ## Buyer
 Home → Search/Category → Product List → Product Details → Add to Cart → Cart → Checkout → Payment → Order Confirmation.
@@ -16,8 +16,8 @@ In Phase 4.1, a DRAFT seller can access only onboarding/profile routes, save the
 ## Seller Orders
 Seller Studio → Orders → SellerOrder → Buyer shipping information → Process → Ship → Deliver.
 
-## Admin Approval
-Admin → Sellers → Pending Seller → Review → Approve/Reject.
+## Admin Seller Review (Phase 4.2)
+Admin → Sellers → Filter/paginate submitted applications → Review store details and status history → Confirm approval (`PENDING` → `ACTIVE`) or reject with a nonblank reason (`PENDING` → `REJECTED`). Competing decisions allow only one winner; the losing Admin sees a conflict and refreshed status. Rejected sellers can view the reason but cannot edit or resubmit in this phase.
 
 ## Reviews
 Buyer → Orders → Eligible delivered product → Rating/comment → Submit Review.

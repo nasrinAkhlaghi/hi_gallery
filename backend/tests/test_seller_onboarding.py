@@ -90,7 +90,7 @@ def test_profile_read_update_and_application_submission_are_owner_scoped(onboard
     assert profile.json()["shop_name"] == "Clay Studio"
     assert profile.json()["status"] == "DRAFT"
     app_status = client.get(f"{SELLER}/application")
-    assert app_status.json() == {"status": "DRAFT", "can_edit": True, "can_submit": True}
+    assert app_status.json() == {"status": "DRAFT", "can_edit": True, "can_submit": True, "rejection_reason": None}
 
     updated = client.patch(
         f"{SELLER}/profile",
@@ -106,7 +106,7 @@ def test_profile_read_update_and_application_submission_are_owner_scoped(onboard
         f"{SELLER}/application/submit", headers={"X-CSRF-Token": csrf(client)}
     )
     assert submitted.status_code == 200
-    assert submitted.json() == {"status": "PENDING", "can_edit": False, "can_submit": False}
+    assert submitted.json() == {"status": "PENDING", "can_edit": False, "can_submit": False, "rejection_reason": None}
     assert client.get(f"{SELLER}/application").json()["status"] == "PENDING"
     assert client.patch(
         f"{SELLER}/profile",

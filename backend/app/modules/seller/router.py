@@ -48,7 +48,13 @@ def patch_profile(body: SellerProfileUpdate, session: DbSession, account: Seller
 def get_application(session: DbSession, account: SellerAccount) -> SellerApplicationResponse:
     seller = _profile_or_http_error(lambda: service.get_seller_profile(session, account.id))
     can_edit = seller.status == "DRAFT"
-    return SellerApplicationResponse(status=seller.status, can_edit=can_edit, can_submit=can_edit)
+    rejection_reason = service.get_latest_rejection_reason(session, seller.id) if seller.status == "REJECTED" else None
+    return SellerApplicationResponse(
+        status=seller.status,
+        can_edit=can_edit,
+        can_submit=can_edit,
+        rejection_reason=rejection_reason,
+    )
 
 
 @router.post("/application/submit", response_model=SellerApplicationResponse)

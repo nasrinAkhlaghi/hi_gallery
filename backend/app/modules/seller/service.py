@@ -41,6 +41,18 @@ def get_seller_profile(session: Session, account_id: UUID) -> Seller:
     return seller
 
 
+def get_latest_rejection_reason(session: Session, seller_id: UUID) -> str | None:
+    return session.scalar(
+        select(SellerStatusHistory.reason)
+        .where(
+            SellerStatusHistory.seller_id == seller_id,
+            SellerStatusHistory.action == "APPLICATION_REJECTED",
+        )
+        .order_by(SellerStatusHistory.created_at.desc(), SellerStatusHistory.id.desc())
+        .limit(1)
+    )
+
+
 def update_seller_profile(session: Session, account: Account, body: SellerProfileUpdate) -> Seller:
     seller = _lock_seller_for_account(session, account.id)
     if seller.status == "SUSPENDED":

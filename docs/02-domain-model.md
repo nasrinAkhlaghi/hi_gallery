@@ -43,7 +43,9 @@ Order 1—N Review
 - Seller may modify only own products/orders.
 - New seller profiles begin in `DRAFT`; explicit submission changes `DRAFT` to `PENDING`. Existing PENDING records are preserved by migration.
 - Seller lifecycle transitions are recorded in `seller_status_history` in the same transaction. `actor_type` identifies SELLER or ADMIN; actor identity comes from authenticated context (or the seller account during registration), never from request input.
-- Phase 4.1 history starts with registration (`NULL` → `DRAFT`) and submission (`DRAFT` → `PENDING`); no historical events are fabricated for existing sellers. Later Admin decisions must append their own events.
+- Phase 4.1 history starts with registration (`NULL` → `DRAFT`) and submission (`DRAFT` → `PENDING`); no historical events are fabricated for existing sellers. Active Admin decisions append `PENDING` → `ACTIVE` or `PENDING` → `REJECTED` events, including the required rejection reason.
+- Admin authorization requires an authenticated account with an Admin profile whose status is `ACTIVE`. An inactive Admin profile does not grant the ADMIN role.
+- Seller review decisions are conditional on the current `PENDING` status and update the seller and append audit history in one transaction. A seller cannot review their own application.
 - OrderItem seller must match SellerOrder seller.
 - Prices and stock cannot be negative.
 - CartItem/OrderItem quantity must be positive.

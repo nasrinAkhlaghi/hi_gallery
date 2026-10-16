@@ -42,7 +42,7 @@ Distinct visual experience from shopping.
 Navigation:
 Dashboard, Products, Orders, Shop, Settings.
 
-Seller onboarding (Phase 4.1) uses the shared Seller layout at `/seller/onboarding`. Non-ACTIVE sellers see the onboarding destination instead of approved-only Seller Studio navigation. DRAFT sellers can edit shop name, optional description and optional logo URL, save the profile, and explicitly confirm “Submit for Review”. PENDING sellers can view their profile and application status but cannot edit or submit again. Show DRAFT and PENDING as distinct text states, with loading, success, validation, conflict, and error feedback. ACTIVE sellers retain the existing Seller Studio navigation and may view their profile. Admin review/decision screens are planned for Phase 4.2 and are not implemented here.
+Seller onboarding uses the shared Seller layout at `/seller/onboarding`. Non-ACTIVE sellers see the onboarding destination instead of approved-only Seller Studio navigation. DRAFT sellers can edit shop name, optional description and optional logo URL, save the profile, and explicitly confirm “Submit for Review”. PENDING sellers can view their profile and application status but cannot edit or submit again. REJECTED sellers see the decision reason and cannot edit or resubmit in Phase 4.2. Show lifecycle states distinctly with loading, success, validation, conflict, and error feedback. ACTIVE sellers retain the existing Seller Studio navigation and may view their profile.
 
 Dashboard cards:
 - Active products
@@ -67,6 +67,8 @@ Dashboard metrics:
 Seller count, buyer count, product count, order count, pending seller approvals.
 
 Admin tables should support useful search/filter/pagination and confirmation for destructive actions.
+
+Seller review at `/admin/sellers` defaults to a PENDING application queue with status filtering and bounded pagination. `/admin/sellers/:sellerId` shows shop name, description, optional logo, status, and ordered lifecycle history. ACTIVE Admins can explicitly confirm approval or provide a required rejection reason. Show loading, empty, error, and stale-decision conflict states. Keep approval/rejection controls unavailable once the application is no longer PENDING. Provide English and Persian labels and preserve readable RTL layout for the filter, history, forms, and pagination.
 
 ## Responsive
 Desktop, tablet, mobile. Mobile must be intentionally designed.

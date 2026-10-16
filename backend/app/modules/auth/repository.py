@@ -48,6 +48,6 @@ def account_roles(account: Account) -> set[Role]:
         roles.add(Role.BUYER)
     if account.seller is not None:
         roles.add(Role.SELLER)
-    if account.admin is not None:
+    if account.admin is not None and account.admin.status == "ACTIVE":
         roles.add(Role.ADMIN)
     return roles

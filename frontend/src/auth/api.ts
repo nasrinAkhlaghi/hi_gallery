@@ -24,6 +24,52 @@ export type SellerApplication = {
   status: string;
   can_edit: boolean;
   can_submit: boolean;
+  rejection_reason?: string | null;
+};
+
+export type AdminSellerStatus = "DRAFT" | "PENDING" | "ACTIVE" | "REJECTED" | "SUSPENDED";
+
+export type AdminSellerListItem = {
+  seller_id: string;
+  shop_name: string;
+  seller_status: AdminSellerStatus;
+  created_at: string;
+  updated_at: string;
+  submitted_at: string | null;
+};
+
+export type AdminSellerList = {
+  items: AdminSellerListItem[];
+  total: number;
+  page: number;
+  page_size: number;
+};
+
+export type AdminSellerHistoryItem = {
+  previous_status: string | null;
+  new_status: string;
+  action: string;
+  timestamp: string;
+  actor_type: "SELLER" | "ADMIN";
+  actor_name: string | null;
+  reason: string | null;
+};
+
+export type AdminSellerDetail = {
+  seller_id: string;
+  shop_name: string;
+  description: string | null;
+  logo_url: string | null;
+  seller_status: AdminSellerStatus;
+  created_at: string;
+  updated_at: string;
+  history: AdminSellerHistoryItem[];
+};
+
+export type AdminSellerDecision = {
+  seller_id: string;
+  seller_status: AdminSellerStatus;
+  decided_at: string;
 };
 
 export class ApiError extends Error {
@@ -141,6 +187,27 @@ export async function getSellerApplication(): Promise<SellerApplication> {
 
 export async function submitSellerApplication(): Promise<SellerApplication> {
   return apiRequest<SellerApplication>("/seller/application/submit", { method: "POST" });
+}
+
+export async function getAdminSellers(status: AdminSellerStatus, page: number, pageSize: number): Promise<AdminSellerList> {
+  const params = new URLSearchParams({ status, page: String(page), page_size: String(pageSize) });
+  return apiRequest<AdminSellerList>(`/admin/sellers?${params.toString()}`);
+}
+
+export async function getAdminSeller(sellerId: string): Promise<AdminSellerDetail> {
+  return apiRequest<AdminSellerDetail>(`/admin/sellers/${encodeURIComponent(sellerId)}`);
+}
+
+export async function approveAdminSeller(sellerId: string): Promise<AdminSellerDecision> {
+  return apiRequest<AdminSellerDecision>(`/admin/sellers/${encodeURIComponent(sellerId)}/approve`, { method: "POST" });
+}
+
+export async function rejectAdminSeller(sellerId: string, reason: string): Promise<AdminSellerDecision> {
+  return apiRequest<AdminSellerDecision>(`/admin/sellers/${encodeURIComponent(sellerId)}/reject`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ reason }),
+  });
 }
 
 export async function logout(): Promise<void> {

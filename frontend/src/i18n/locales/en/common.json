@@ -169,6 +169,60 @@
       "rejected": "This application was rejected. Editing and resubmission will be handled in a later phase.",
       "suspended": "Selling privileges for this account are suspended. You can view your profile and status.",
       "unknown": "Your seller application status is unavailable."
-    }
+    },
+    "rejectionReason": "Reason for the decision"
+  },
+  "adminReview": {
+    "status": {
+      "draft": "Draft",
+      "pending": "In review",
+      "active": "Approved",
+      "rejected": "Rejected",
+      "suspended": "Suspended"
+    },
+    "eyebrow": "Admin Console",
+    "listTitle": "Seller applications",
+    "filterLabel": "Filter by status",
+    "loading": "Loading seller applications…",
+    "empty": "No seller applications match this status.",
+    "loadError": "We could not load seller application data. Please try again.",
+    "notFound": "This seller application could not be found.",
+    "conflict": "This application changed before your decision was saved. Its current status has been refreshed.",
+    "submittedAt": "Submitted",
+    "unavailable": "Not available",
+    "viewDetails": "Review details",
+    "paginationLabel": "Seller application pages",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {{current}} of {{total}}",
+    "statusLabel": "Status",
+    "backToList": "Back to seller applications",
+    "profileTitle": "Store profile",
+    "descriptionLabel": "Description",
+    "noDescription": "No description provided.",
+    "logoAlt": "{{shop}} logo",
+    "createdAt": "Profile created",
+    "updatedAt": "Profile updated",
+    "historyTitle": "Application history",
+    "noHistory": "No status history is available.",
+    "noPreviousStatus": "Application created",
+    "actor": {
+      "seller": "Seller",
+      "admin": "Admin"
+    },
+    "approve": "Approve",
+    "reject": "Reject",
+    "approveConfirmTitle": "Approve this seller application?",
+    "approveConfirmDescription": "The seller will become active and gain access to approved seller tools.",
+    "confirmApprove": "Confirm approval",
+    "rejectConfirmTitle": "Reject this seller application",
+    "reasonLabel": "Rejection reason",
+    "reasonRequired": "Enter a reason before rejecting this application.",
+    "reasonTooLong": "The reason must be 2000 characters or fewer.",
+    "confirmReject": "Confirm rejection",
+    "cancel": "Cancel",
+    "processing": "Saving decision…",
+    "approved": "The seller application was approved.",
+    "rejected": "The seller application was rejected."
   }
 }

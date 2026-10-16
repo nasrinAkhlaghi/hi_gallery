@@ -109,6 +109,8 @@ All endpoints require an authenticated SELLER profile. State-changing requests u
 
 `GET /seller/application` returns `{ "status", "can_edit", "can_submit" }`. During Phase 4.1 both flags are true only for `DRAFT`.
 
+After Phase 4.2, this response also includes `rejection_reason` for the authenticated seller's own `REJECTED` application, derived from its latest `APPLICATION_REJECTED` audit event. It is null for other statuses. Rejected sellers cannot edit or resubmit in this phase.
+
 `POST /seller/application/submit` accepts an empty body. It atomically changes `DRAFT` to `PENDING`, adds a `DRAFT` → `PENDING` seller lifecycle audit event, and returns the application status. Only a DRAFT can be submitted; duplicate or concurrent submissions return `409 INVALID_APPLICATION_TRANSITION`. Pending sellers may read profile and status but cannot edit or submit again. Rejected-seller editing/resubmission is planned for a later phase; Admin review and decision endpoints are not implemented in Phase 4.1.
 
 The seller status history is append-only. Phase 4.1 records seller registration (`NULL` → `DRAFT`) and application submission (`DRAFT` → `PENDING`) with actor type `SELLER` and identity derived from the authenticated account. The migration does not fabricate events for sellers that existed before it; historical PENDING rows remain PENDING and have no synthetic history.
@@ -124,6 +126,18 @@ The seller status history is append-only. Phase 4.1 records seller registration 
 - GET `/admin/products`
 - GET `/admin/orders`
 - GET `/admin/reviews`
+
+### Seller review (Phase 4.2)
+
+Review endpoints require a valid authenticated account and an Admin profile with `status = ACTIVE`. Inactive Admin profiles do not receive the ADMIN role. State-changing requests also require the CSRF cookie/header and trusted Origin checks.
+
+`GET /admin/sellers?status=PENDING&page=0&page_size=20` returns a paginated queue. `status` accepts `DRAFT`, `PENDING`, `ACTIVE`, `REJECTED`, or `SUSPENDED` and defaults to `PENDING`; page is zero-based, page size defaults to 20 and is bounded from 1 to 100. Results are deterministically ordered by submission time (newest first; legacy records without a submission event use creation time) and seller UUID. The response is `{ "items": [{ "seller_id", "shop_name", "seller_status", "created_at", "updated_at", "submitted_at" }], "total", "page", "page_size" }`. Submitted time is derived from the existing audit event; no column was added. Only explicit seller fields are returned.
+
+`GET /admin/sellers/{sellerId}` returns seller ID, shop name, description, logo URL, status, profile timestamps, and ordered lifecycle `history`. Each history item contains previous/new status, action, timestamp, actor type, optional Admin display name, and reason. It does not return account email, password hash, tokens, or actor account IDs. Unknown sellers return `404 SELLER_NOT_FOUND`.
+
+`POST /admin/sellers/{sellerId}/approve` accepts no body and changes only `PENDING` to `ACTIVE`. `POST /admin/sellers/{sellerId}/reject` accepts `{ "reason": "..." }`; the trimmed reason must contain 1–2000 characters. It changes only `PENDING` to `REJECTED`. Both return `{ "seller_id", "seller_status", "decided_at" }` and append `APPLICATION_APPROVED` or `APPLICATION_REJECTED` to `seller_status_history` in the same transaction. Actor identity comes from the authenticated Admin context. A seller cannot decide their own application. A missing seller returns 404, an inactive/insufficient role returns 403, and stale/invalid transitions return `409 SELLER_DECISION_CONFLICT`; missing/blank/oversized reasons return 422. Conditional status updates serialize competing decisions: exactly one can succeed and the loser receives 409 without an audit event.
+
+Admin approval/rejection is implemented. Seller resubmission and suspension remain future workflows.
 
 ## Authorization
 Backend must enforce ownership. Seller can access only own products/SellerOrders. Buyer can access only own cart/orders and eligible reviews. Admin can access admin APIs.
