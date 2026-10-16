@@ -1,0 +1,82 @@
+{
+  "app": {
+    "name": "HI Gallery",
+    "documentTitle": "گالری HI — ساخته‌شده به دست انسان",
+    "description": "گالری HI، خانه‌ای برای چیزهایی است که به دست انسان ساخته شده‌اند.",
+    "homeLabel": "صفحهٔ اصلی گالری HI"
+  },
+  "navigation": {
+    "label": "ناوبری اصلی",
+    "discover": "کاوش",
+    "categories": "دسته‌بندی‌ها",
+    "cart": "سبد خرید",
+    "orders": "سفارش‌ها",
+    "profile": "پروفایل",
+    "ourStory": "داستان ما",
+    "search": "جست‌وجو",
+    "openMenu": "باز کردن منو",
+    "closeMenu": "بستن منو"
+  },
+  "language": {
+    "select": "انتخاب زبان",
+    "english": "English",
+    "persian": "فارسی"
+  },
+  "actions": {
+    "meetMakers": "آشنایی با سازندگان",
+    "exploreGallery": "گشت‌وگذار در گالری",
+    "viewAll": "مشاهدهٔ همه"
+  },
+  "home": {
+    "eyebrow": "بازاری برای ساخته‌های دست‌ساز",
+    "titleLineOne": "چیزهای خوب",
+    "titleLineTwo": "با دست‌های",
+    "titleHighlight": "انسان",
+    "titleLineThree": "ساخته می‌شوند.",
+    "description": "با سازندگان مستقل آشنا شوید و آثار سنجیده‌ای را کشف کنید؛ ساخته‌هایی که با حوصله و برای ماندگاری پدید آمده‌اند.",
+    "supportingLine": "معنایی بیشتر در زندگی روزمره.",
+    "makerStatement": "ساختهٔ دست انسان، برای انسان",
+    "imageAlt": "ظروف سرامیکی دست‌ساز در نور گرم و طبیعی",
+    "makerInitial": "س",
+    "imageCardTitle": "با دقت و ظرافت ساخته‌شده",
+    "imageCardDescription": "پشت هر اثر، انسانی قرار دارد.",
+    "imageBadge": "چیزهایی برای ماندن",
+    "categoriesEyebrow": "دنیای دست‌سازها را پیدا کنید",
+    "categoriesTitle": "دنیایی از چیزهای دوست‌داشتنی",
+    "discoveryEyebrow": "گالری در حال شکل‌گیری است",
+    "discoveryTitle": "جایی برای سازندگان و فضایی برای کشف چیزهای تازه.",
+    "discoveryDescription": "داریم همه‌چیز را آماده می‌کنیم. به‌زودی آثار منحصربه‌فرد و سازندگانشان را اینجا خواهید دید.",
+    "footerTagline": "هوش انسانی، نمایان در ساخته‌ها."
+  },
+  "categories": {
+    "ceramics": "سرامیک",
+    "textiles": "منسوجات",
+    "jewelry": "زیورآلات",
+    "homeObjects": "وسایل خانه"
+  },
+  "pages": {
+    "scaffoldLabel": "پیش‌نمایش صفحه",
+    "scaffoldMessage": "این صفحه فعلاً نمایشی است.",
+    "browse": "مرور محصولات",
+    "categories": "دسته‌بندی‌ها",
+    "productDetails": "جزئیات محصول",
+    "productDescription": "محصول {{id}}",
+    "cart": "سبد خرید",
+    "checkout": "تکمیل خرید",
+    "orders": "سفارش‌ها",
+    "reviews": "دیدگاه‌ها",
+    "profile": "پروفایل",
+    "dashboard": "داشبورد",
+    "products": "محصولات",
+    "shop": "فروشگاه",
+    "settings": "تنظیمات",
+    "sellers": "فروشندگان",
+    "buyers": "خریداران",
+    "reports": "گزارش‌ها"
+  },
+  "workspace": {
+    "sellerStudio": "فضای فروشنده",
+    "adminConsole": "پنل مدیریت",
+    "navigationLabel": "ناوبری {{area}}"
+  }
+}
