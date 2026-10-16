@@ -114,10 +114,11 @@ describe("route layouts and navigation", () => {
     "/admin/orders",
     "/admin/reviews",
     "/admin/reports",
-  ])("renders the language control on direct route %s", (path) => {
+  ])("renders the language control on direct route %s", async (path) => {
     renderAt(path);
 
     const expectedCount = path === "/" || path.startsWith("/seller") || path.startsWith("/admin") ? 2 : 1;
+    await screen.findAllByRole("combobox", { name: "Select language" });
     expect(screen.getAllByRole("combobox", { name: "Select language" })).toHaveLength(expectedCount);
   });
 
@@ -135,9 +136,10 @@ describe("route layouts and navigation", () => {
     expect(screen.getAllByRole("combobox", { name: "انتخاب زبان" })).toHaveLength(switcherCount);
   });
 
-  it("renders buyer and workspace navigation links that target existing route paths", () => {
+  it("renders buyer and workspace navigation links that target existing route paths", async () => {
     renderAt("/");
 
+    await screen.findAllByRole("navigation", { name: "Main navigation" });
     const homeNavigation = screen.getAllByRole("navigation", { name: "Main navigation" })[0];
     expect(within(homeNavigation).getByRole("link", { name: "Categories" })).toHaveAttribute("href", "/categories");
     expect(within(homeNavigation).getByRole("link", { name: "Cart" })).toHaveAttribute("href", "/cart");
@@ -146,6 +148,7 @@ describe("route layouts and navigation", () => {
 
     cleanup();
     renderAt("/admin");
+    await screen.findByRole("button", { name: "Open Admin Console menu" });
     const adminNavigation = document.querySelector("#admin-mobile-navigation");
     expect(adminNavigation).not.toBeNull();
     for (const route of ["/admin", "/admin/sellers", "/admin/buyers", "/admin/products", "/admin/orders", "/admin/reviews", "/admin/reports"]) {
@@ -156,7 +159,7 @@ describe("route layouts and navigation", () => {
   it("opens the seller mobile menu and closes it after navigation", async () => {
     renderAt("/seller");
 
-    const menuButton = screen.getByRole("button", { name: "Open Seller Studio menu" });
+    const menuButton = await screen.findByRole("button", { name: "Open Seller Studio menu" });
     fireEvent.click(menuButton);
     expect(menuButton).toHaveAttribute("aria-expanded", "true");
 
@@ -171,7 +174,7 @@ describe("route layouts and navigation", () => {
   it("closes the buyer mobile menu when a route link is selected", async () => {
     renderAt("/");
 
-    const menuButton = screen.getByRole("button", { name: "Open menu" });
+    const menuButton = await screen.findByRole("button", { name: "Open menu" });
     fireEvent.click(menuButton);
     expect(menuButton).toHaveAttribute("aria-expanded", "true");
 
@@ -186,7 +189,7 @@ describe("route layouts and navigation", () => {
   it("keeps the route and closes the seller mobile menu after changing language", async () => {
     renderAt("/seller/orders");
 
-    const menuButton = screen.getByRole("button", { name: "Open Seller Studio menu" });
+    const menuButton = await screen.findByRole("button", { name: "Open Seller Studio menu" });
     fireEvent.click(menuButton);
     const mobileNavigation = document.querySelector("#seller-mobile-navigation") as HTMLElement;
     fireEvent.change(within(mobileNavigation).getByRole("combobox", { name: "Select language" }), {

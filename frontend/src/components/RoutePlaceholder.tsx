@@ -3,6 +3,7 @@ import { Menu, X } from "lucide-react";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { AuthControls } from "../auth/AuthControls";
 
 type RoutePlaceholderProps = {
   titleKey: string;
@@ -15,8 +16,9 @@ export function RoutePlaceholder({ titleKey, descriptionKey, descriptionOptions,
   const { t } = useTranslation();
   return (
     <main className="mx-auto min-h-screen max-w-5xl px-6 py-12 text-foreground">
-      <header className="flex items-center justify-between gap-4">
+      <header className="flex flex-wrap items-center justify-between gap-4">
         <Link to="/" className="text-sm text-primary">{t("app.name")}</Link>
+        <AuthControls />
         {showLanguageSwitcher && <LanguageSwitcher />}
       </header>
       <p className="mt-16 text-xs uppercase tracking-[0.18em] text-muted-foreground">{t("pages.scaffoldLabel")}</p>
@@ -119,6 +121,7 @@ export function WorkspaceLayout({ area }: { area: WorkspaceArea }) {
             <WorkspaceNavigationLinks area={area} />
           </nav>
           <div className="flex items-center gap-3">
+            <span className="hidden sm:block"><AuthControls /></span>
             <LanguageSwitcher className="hidden md:block" />
             <button
               ref={mobileMenuButtonRef}
@@ -140,6 +143,7 @@ export function WorkspaceLayout({ area }: { area: WorkspaceArea }) {
           >
             <WorkspaceNavigationLinks area={area} mobile onNavigate={() => setMobileMenuOpen(false)} />
             <LanguageSwitcher className="mt-1 w-full" onLanguageChange={() => setMobileMenuOpen(false)} />
+            <div className="px-3 py-2"><AuthControls /></div>
           </nav>
         </div>
       </header>

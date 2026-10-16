@@ -53,6 +53,14 @@ Copy `.env.example` to `.env` in the repository root. The included values are fo
 Copy-Item .env.example .env
 ```
 
+Set independent random signing keys before starting the API. Each key must contain at least 32 bytes; keep them private and stable across restarts:
+
+```powershell
+python -c "import secrets; print('JWT_SIGNING_KEY=' + secrets.token_urlsafe(48)); print('CSRF_SIGNING_KEY=' + secrets.token_urlsafe(48))"
+```
+
+Copy the two generated values into `.env`. For production, set `ENVIRONMENT=production`, use HTTPS, set `DATABASE_URL`, and list the exact frontend origins in `CORS_ALLOWED_ORIGINS`.
+
 On macOS or Linux, use `cp .env.example .env` instead.
 
 ### Start PostgreSQL
@@ -98,6 +106,8 @@ Run the backend tests from `backend/` with:
 pytest
 ```
 
+Auth uses a 15-minute signed access JWT and a rotating seven-day opaque refresh token in separate HttpOnly cookies. See [Authentication API](docs/05-api-specification.md#authentication) and [Authentication architecture](docs/06-architecture.md#authentication-and-authorization). The new refresh-token table is migration `0002_refresh_tokens`; after reviewing the target database, apply it from `backend/` with `alembic upgrade head`. Do not point test suites at a shared or production database.
+
 ### Start the frontend
 
 In a separate terminal, from the repository root:
@@ -107,6 +117,10 @@ cd frontend
 npm install
 npm run dev
 ```
+
+The frontend sends credentialed requests to `VITE_API_BASE_URL` (default local value: `http://localhost:8000/api/v1`). Authentication cookies are never read by JavaScript or copied into browser storage. Start the API and frontend on the explicit local origins listed in `CORS_ALLOWED_ORIGINS`.
+
+Run the frontend checks from `frontend/` with `npm test` and `npm run build`.
 
 Vite prints the local URL when it starts (normally <http://localhost:5173>).
 

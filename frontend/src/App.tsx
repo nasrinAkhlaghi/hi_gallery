@@ -4,6 +4,9 @@ import { BrowserRouter, Link, Route, Routes, useParams } from "react-router-dom"
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
 import { BuyerRoutePlaceholder, RoutePlaceholder, WorkspaceLayout } from "./components/RoutePlaceholder";
+import { AuthProvider } from "./auth/AuthContext";
+import { AuthControls } from "./auth/AuthControls";
+import { LoginPage, RegistrationPage, RequireAuth } from "./auth/AuthPages";
 
 const categories = ["ceramics", "textiles", "jewelry", "homeObjects"] as const;
 
@@ -92,7 +95,8 @@ function HomePage() {
         <div className="flex items-center gap-3">
           <button className="grid h-11 w-11 place-items-center rounded-full border border-border focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" aria-label={t("navigation.search")}><Search size={17} /></button>
           <LanguageSwitcher className="hidden md:block" />
-          <button className="hidden rounded-full bg-foreground px-5 py-3 text-sm text-background focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary sm:block">{t("actions.meetMakers")}</button>
+          <span className="hidden sm:block"><AuthControls /></span>
+          <button className="hidden rounded-full bg-foreground px-5 py-3 text-sm text-background focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary lg:block">{t("actions.meetMakers")}</button>
           <button
             ref={mobileMenuButtonRef}
             type="button"
@@ -113,6 +117,7 @@ function HomePage() {
         >
           <BuyerNavigationLinks mobile onNavigate={() => setMobileMenuOpen(false)} />
           <LanguageSwitcher className="w-full" onLanguageChange={() => setMobileMenuOpen(false)} />
+          <div className="px-3 py-2"><AuthControls /></div>
         </nav>
       </header>
 
@@ -163,24 +168,28 @@ function ProductPlaceholder() {
 function App() {
   return (
     <BrowserRouter>
+      <AuthProvider>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegistrationPage />} />
+        <Route path="/register/seller" element={<RegistrationPage seller />} />
         <Route path="/browse" element={<BuyerRoutePlaceholder titleKey="pages.browse" />} />
         <Route path="/products/:id" element={<ProductPlaceholder />} />
         <Route path="/categories" element={<BuyerRoutePlaceholder titleKey="pages.categories" />} />
-        <Route path="/cart" element={<BuyerRoutePlaceholder titleKey="pages.cart" />} />
-        <Route path="/checkout" element={<BuyerRoutePlaceholder titleKey="pages.checkout" />} />
-        <Route path="/orders" element={<BuyerRoutePlaceholder titleKey="pages.orders" />} />
+        <Route path="/cart" element={<RequireAuth><BuyerRoutePlaceholder titleKey="pages.cart" /></RequireAuth>} />
+        <Route path="/checkout" element={<RequireAuth><BuyerRoutePlaceholder titleKey="pages.checkout" /></RequireAuth>} />
+        <Route path="/orders" element={<RequireAuth><BuyerRoutePlaceholder titleKey="pages.orders" /></RequireAuth>} />
         <Route path="/reviews" element={<BuyerRoutePlaceholder titleKey="pages.reviews" />} />
-        <Route path="/profile" element={<BuyerRoutePlaceholder titleKey="pages.profile" />} />
-        <Route path="/seller" element={<WorkspaceLayout area="seller" />}>
+        <Route path="/profile" element={<RequireAuth><BuyerRoutePlaceholder titleKey="pages.profile" /></RequireAuth>} />
+        <Route path="/seller" element={<RequireAuth role="SELLER" activeSeller><WorkspaceLayout area="seller" /></RequireAuth>}>
           <Route index element={<RoutePlaceholder titleKey="pages.dashboard" />} />
           <Route path="products" element={<RoutePlaceholder titleKey="pages.products" />} />
           <Route path="orders" element={<RoutePlaceholder titleKey="pages.orders" />} />
           <Route path="shop" element={<RoutePlaceholder titleKey="pages.shop" />} />
           <Route path="settings" element={<RoutePlaceholder titleKey="pages.settings" />} />
         </Route>
-        <Route path="/admin" element={<WorkspaceLayout area="admin" />}>
+        <Route path="/admin" element={<RequireAuth role="ADMIN"><WorkspaceLayout area="admin" /></RequireAuth>}>
           <Route index element={<RoutePlaceholder titleKey="pages.dashboard" />} />
           <Route path="sellers" element={<RoutePlaceholder titleKey="pages.sellers" />} />
           <Route path="buyers" element={<RoutePlaceholder titleKey="pages.buyers" />} />
@@ -190,6 +199,7 @@ function App() {
           <Route path="reports" element={<RoutePlaceholder titleKey="pages.reports" />} />
         </Route>
       </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
