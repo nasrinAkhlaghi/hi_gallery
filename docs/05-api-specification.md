@@ -3,9 +3,9 @@
 Base URL: `/api/v1`
 Format: JSON, UUID identifiers, ISO-8601 timestamps.
 
-## Planned storefront APIs
+## Storefront APIs (steps 1 and 2)
 
-`GET/PATCH /seller/shop` is implemented for ACTIVE sellers. Public `/shops/{sellerId}`, `/shops/{sellerId}/products` and buyer product discovery/detail remain planned. Request/response fields, search, pagination, authorization and public visibility are specified in [Storefront plan — API contracts](09-storefront-plan.md#planned-api-contracts). Existing onboarding `/seller/profile` contracts remain unchanged; ACTIVE seller presentation edits use the separate shop endpoint.
+`GET/PATCH /seller/shop` is implemented for ACTIVE sellers. Public `/shops/{sellerId}`, `/shops/{sellerId}/products`, `/products`, `/products/{productId}` and `/categories/{categoryId}/products` are also implemented for signed-out and signed-in visitors. Request/response fields, search, pagination, authorization and public visibility are specified in [Storefront plan — API contracts](09-storefront-plan.md#planned-api-contracts). Existing onboarding `/seller/profile` contracts remain unchanged; ACTIVE seller presentation edits use the separate shop endpoint.
 
 ## Authentication
 - POST `/auth/register`
@@ -67,6 +67,8 @@ Roles are derived from the existing Buyer, Seller, and Admin profile relationshi
 The migration creates `refresh_tokens` with UUID identity/account/family references, a unique token hash, creation/expiry/revocation timestamps, a replacement-token link, and reuse-detection timestamp. No plaintext refresh token is stored. Run a dry run with `python -m app.modules.auth.cleanup_refresh_tokens --dry-run` from `backend/`, then run `python -m app.modules.auth.cleanup_refresh_tokens` periodically through an external scheduler. The command deletes rows in transactions of at most 500 rows by default (configurable up to 5,000) when `expires_at` is more than 30 days in the past; it never deletes an unexpired token. Each batch commits separately, so runs are repeatable and hold locks only for a bounded batch. Reuse detection is retained for 30 days after a token expires; a token replay after that window cannot be associated with its former family once its row is removed. No scheduler is installed by the application.
 
 ## Buyer
+- GET `/shops/{sellerId}`
+- GET `/shops/{sellerId}/products`
 - GET `/products`
 - GET `/products/{productId}`
 - GET `/categories`
@@ -79,6 +81,18 @@ The migration creates `refresh_tokens` with UUID identity/account/family referen
 - GET `/orders`
 - GET `/orders/{orderId}`
 - POST `/orders/{orderId}/reviews`
+
+### Public shop and product discovery (storefront step 2)
+
+All public GET endpoints are available without login and return only explicit public fields. Shops require both an ACTIVE seller and owning account; unknown/unavailable shops return `404 SHOP_NOT_FOUND`. Public products additionally require ACTIVE or SOLD_OUT status; all other product detail requests return `404 PRODUCT_NOT_FOUND`. The same eligibility applies before list pagination and total counting. Zero stock does not automatically change status; SOLD_OUT and zero-stock products remain visible.
+
+`GET /shops/{sellerId}` returns `{id,shop_name,description,logo_url,category,theme_id}`. Primary category is null if absent or disabled. `GET /shops/{sellerId}/products` returns only that shop's visible products; an available empty shop returns 200 with an empty page.
+
+All public product lists return `{items,total,page,page_size}` with zero-based pages, default size 20, sizes 1–100, and creation time descending then UUID. Product projection is `{id,name,description,category,price,stock,status,images,seller}`. Category has `{id,parent_id,name,slug}`, seller has only `{id,shop_name}`, images have `{id,url,sort_order}` sorted cover-first, and prices are decimal strings. No private account/application fields or fabricated ratings are included.
+
+`GET /products` supports optional `q` (trimmed, maximum 200 characters, case-insensitive literal name substring) and `category_id` (exact category, without descendants). Search wildcards are treated literally; blank search adds no filter. Shop product lists support the same exact `category_id` filter. Well-formed filters with no matches return an empty page. Invalid query values/UUIDs return 422. `GET /categories/{categoryId}/products` requires an ACTIVE category or returns `404 CATEGORY_NOT_FOUND`. Disabling a category does not hide its published products from Browse or detail; it removes the category from active navigation and makes this dedicated category route unavailable.
+
+These endpoints are implemented; their frontend pages remain placeholders until the next UI tasks. The complete field contracts and acceptance criteria are in [Storefront plan](09-storefront-plan.md).
 
 ## Seller
 - GET `/seller/profile`
@@ -141,7 +155,7 @@ Product management endpoints require an authenticated ACTIVE Seller. Ownership i
 - `POST /seller/products/{id}/images` takes the image file bytes as the request body, with `Content-Type: image/jpeg`, `image/png` or `image/webp` (not JSON or multipart). Returns the new image with 201. The streamed body is bounded to 5 MiB (413 on excess); decoded dimensions are bounded to 16 million pixels. Empty, mismatched, malformed, animated and unsupported files return `422 INVALID_PRODUCT_IMAGE`. Files are decoded and re-encoded without original metadata, stored with generated UUID filenames, and served publicly under `/media/products/{filename}` only while their database record exists. No source filename or remote URL is accepted. Local uploads are development-only; production returns `503 LOCAL_UPLOADS_DEVELOPMENT_ONLY` until durable storage is integrated.
 - `DELETE /seller/products/{id}/images/{imageId}` returns 204. Database writes commit before local files are removed; failed image inserts clean up their new file. If post-commit file cleanup fails, the orphan is logged and no longer served. A process crash between disk and database writes may leave an orphan; local storage is not a distributed transaction.
 
-Product publication currently controls stored status. Public buyer product listing/detail is not implemented in this phase. Products and media use existing schema tables; no migration is added. Development-only sample categories and a local Admin can be provisioned explicitly with `python -m app.seed_dev`; existing users are never promoted and existing passwords are not reset.
+Product publication controls stored status and public eligibility as described above; public buyer product listing/detail is implemented in storefront step 2. Products and media use existing schema tables; no migration is added. Development-only sample categories and a local Admin can be provisioned explicitly with `python -m app.seed_dev`; existing users are never promoted and existing passwords are not reset.
 
 ## Admin
 - GET `/admin/dashboard`

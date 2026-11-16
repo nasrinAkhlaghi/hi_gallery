@@ -8,6 +8,8 @@ from urllib.parse import urlsplit
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
+from app.modules.products.schemas import CategoryResponse
+
 
 class SellerProfileUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -85,6 +87,15 @@ class SellerShopResponse(BaseModel):
     shop_category_id: UUID | None
     theme_id: Literal["gallery", "linen", "clay"]
     updated_at: datetime
+
+
+class PublicShopResponse(BaseModel):
+    id: UUID
+    shop_name: str
+    description: str | None
+    logo_url: str | None
+    category: CategoryResponse | None
+    theme_id: Literal["gallery", "linen", "clay"]
 
 
 class SellerApplicationResponse(BaseModel):

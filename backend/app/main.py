@@ -13,8 +13,8 @@ from app.core.config import get_settings
 from app.db import models  # noqa: F401 - register all relationship targets before handling requests
 from app.modules.auth.router import router as auth_router
 from app.modules.admin.router import router as admin_router
-from app.modules.seller.router import router as seller_router
-from app.modules.products.router import router as product_router, media_router
+from app.modules.seller.router import router as seller_router, public_router as public_shop_router
+from app.modules.products.router import router as product_router, media_router, public_router as public_product_router
 
 # Validate required configuration before the application begins serving requests.
 get_settings()
@@ -34,6 +34,8 @@ app.include_router(auth_router)
 app.include_router(seller_router)
 app.include_router(admin_router)
 app.include_router(product_router)
+app.include_router(public_shop_router)
+app.include_router(public_product_router)
 app.include_router(media_router)
 
 

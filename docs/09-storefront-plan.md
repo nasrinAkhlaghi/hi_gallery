@@ -2,7 +2,7 @@
 
 ## Status and scope
 
-Step 1 is implemented in code: additive migration `0004_shop_settings`, seller fields and authenticated shop settings APIs. Apply the migration to a reviewed target database before running the updated API. Public storefront endpoints and frontend pages (steps 2–5) remain planned. Seller onboarding, Admin approval and approved-seller product management already exist. This document specifies the next connection between Seller Studio and the buyer experience: shop category, shop theme, public shop page, and public product discovery/detail.
+Steps 1 and 2 are implemented in code: additive migration `0004_shop_settings`, seller fields, authenticated shop settings APIs, and public shop/product discovery and detail APIs. Apply the migration to a reviewed target database before running the updated API. Frontend pages (steps 3–5) remain planned. Seller onboarding, Admin approval and approved-seller product management already exist. This document specifies the next connection between Seller Studio and the buyer experience: shop category, shop theme, public shop page, and public product discovery/detail.
 
 The MVP choices below keep the first implementation small: one optional primary shop category, three built-in themes, UUID-based public shop URLs, and explicit saving of shop settings. Additional categories, custom themes and shop slugs can be added later.
 
@@ -38,7 +38,7 @@ Migration `0004_shop_settings` adds these fields and constraints; models and `do
 
 ## Planned API contracts
 
-All paths below are relative to `/api/v1`. Shop settings endpoints are implemented in step 1; public shop/product endpoints remain planned. Existing `/seller/profile` and onboarding contracts remain unchanged.
+All paths below are relative to `/api/v1`. Shop settings endpoints are implemented in step 1; public shop/product endpoints are implemented in step 2. Existing `/seller/profile` and onboarding contracts remain unchanged.
 
 ### Shop settings (implemented)
 
@@ -46,7 +46,7 @@ All paths below are relative to `/api/v1`. Shop settings endpoints are implement
 - `PATCH /seller/shop`: same authorization, CSRF and Origin checks as existing seller mutations. Accept only supplied fields from `{shop_name,description,logo_url,shop_category_id,theme_id}`. At least one field is required. Name and theme cannot be null; category, description and logo may be cleared with null. Unknown fields, seller IDs and status fields are rejected. Validate the whole request before an atomic save; return the updated settings shape.
 - Invalid theme or unavailable category returns 422 (`INVALID_SHOP_THEME` or `CATEGORY_UNAVAILABLE`). Ownership comes from authentication. No seller ID is accepted in either settings endpoint.
 
-### Public shop and products
+### Public shop and products (implemented)
 
 - `GET /shops/{sellerId}` returns `{id,shop_name,description,logo_url,category,theme_id}`; `category` is `{id,parent_id,name,slug}` for an active primary category, otherwise null.
 - `GET /shops/{sellerId}/products?page=0&page_size=20&category_id=...` returns `{items,total,page,page_size}` and 404 when the shop is unavailable. An available empty shop returns 200 with no items.
@@ -61,7 +61,7 @@ All product lists use zero-based pages, default size 20, allowed sizes 1–100, 
 ## Implementation order
 
 1. **Implemented in code:** migration, model fields and settings API with authorization/validation coverage. The PostgreSQL legacy-data upgrade/downgrade check is opt-in and requires a separate disposable test database.
-2. Add shared public visibility queries, shop/product endpoints and contract tests. Verify direct detail URLs cannot expose unpublished products or unavailable shops.
+2. **Implemented in code:** shared public visibility queries, shop/product endpoints and contract tests. Direct detail URLs, lists and totals enforce the same visibility rules.
 3. Replace `/seller/shop` placeholder with settings, theme previews, save feedback and links to product management/public shop.
 4. Build `/shops/:sellerId`, `/browse`, `/categories` and `/products/:id`; connect seller links and category navigation to real data.
 5. Verify the complete seller-to-buyer flow in English and Persian on desktop and mobile; update the manual testing guide and implementation status.

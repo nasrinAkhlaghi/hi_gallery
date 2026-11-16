@@ -50,6 +50,26 @@ def get_seller_profile(session: Session, account_id: UUID) -> Seller:
     return seller
 
 
+def public_seller_conditions():
+    """Shared eligibility for public shops and all public product queries."""
+    return (Seller.status == "ACTIVE", Account.status == "ACTIVE")
+
+
+def get_public_shop(session: Session, seller_id: UUID) -> dict:
+    seller = session.scalar(
+        select(Seller).join(Account, Account.id == Seller.account_id)
+        .where(Seller.id == seller_id, *public_seller_conditions())
+    )
+    if seller is None:
+        raise SellerProfileNotFound
+    category = session.get(Category, seller.shop_category_id) if seller.shop_category_id is not None else None
+    return {
+        "id": seller.id, "shop_name": seller.shop_name, "description": seller.description,
+        "logo_url": seller.logo_url, "theme_id": seller.theme_id,
+        "category": category if category is not None and category.status == "ACTIVE" else None,
+    }
+
+
 def update_seller_shop(session: Session, account: Account, body: SellerShopUpdate) -> Seller:
     try:
         seller = session.scalar(

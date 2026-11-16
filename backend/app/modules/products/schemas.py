@@ -75,3 +75,29 @@ class CategoryList(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class PublicSellerResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    shop_name: str
+
+
+class PublicProductResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    name: str
+    description: str | None
+    category: CategoryResponse
+    price: Decimal
+    stock: int
+    status: Literal["ACTIVE", "SOLD_OUT"]
+    images: list[ImageResponse]
+    seller: PublicSellerResponse
+
+
+class PublicProductList(BaseModel):
+    items: list[PublicProductResponse]
+    total: int
+    page: int
+    page_size: int

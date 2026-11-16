@@ -1,6 +1,7 @@
 """Seller-owned onboarding, profile and approved-shop settings endpoints."""
 
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -16,12 +17,22 @@ from app.modules.seller.schemas import (
     SellerProfileUpdate,
     SellerShopResponse,
     SellerShopUpdate,
+    PublicShopResponse,
 )
 
 router = APIRouter(prefix="/api/v1/seller", tags=["seller onboarding"])
+public_router = APIRouter(prefix="/api/v1/shops", tags=["public shops"])
 DbSession = Annotated[Session, Depends(get_db)]
 SellerAccount = Annotated[Account, Depends(require_roles(Role.SELLER))]
 ActiveSellerAccount = Annotated[Account, Depends(require_roles(Role.SELLER, active_seller=True))]
+
+
+@public_router.get("/{seller_id}", response_model=PublicShopResponse)
+def public_shop(seller_id: UUID, session: DbSession):
+    try:
+        return service.get_public_shop(session, seller_id)
+    except service.SellerProfileNotFound:
+        raise HTTPException(404, detail={"code": "SHOP_NOT_FOUND"}) from None
 
 
 def _profile_or_http_error(action):

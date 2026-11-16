@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from fastapi.responses import FileResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
+from pydantic import StringConstraints
 
 from app.core.config import get_settings
 from app.db.session import get_db
@@ -14,16 +15,20 @@ from app.modules.auth.dependencies import require_roles
 from app.modules.auth.models import Account
 from app.modules.auth.schemas import Role
 from app.modules.categories.models import Category
-from app.modules.products import service, storage
+from app.modules.products import service, storage, public_service
 from app.modules.products.models import ProductImage
 from app.modules.products.schemas import CategoryList, ImageResponse, ProductList, ProductResponse, ProductStatus, ProductWrite
+from app.modules.products.schemas import PublicProductList, PublicProductResponse
+from app.modules.seller import service as seller_service
 
 router = APIRouter(prefix="/api/v1", tags=["seller products"])
 media_router = APIRouter(tags=["product media"])
+public_router = APIRouter(prefix="/api/v1", tags=["public products"])
 DbSession = Annotated[Session, Depends(get_db)]
 ActiveSeller = Annotated[Account, Depends(require_roles(Role.SELLER, active_seller=True))]
 Page = Annotated[int, Query(ge=0)]
 PageSize = Annotated[int, Query(ge=1, le=100)]
+Search = Annotated[str, StringConstraints(strip_whitespace=True, max_length=200), Query()]
 
 
 def perform(action):
@@ -31,6 +36,33 @@ def perform(action):
         return action()
     except service.ProductError as exc:
         raise HTTPException(exc.status, detail={"code": exc.code}) from None
+
+
+@public_router.get("/products", response_model=PublicProductList)
+def browse_products(session: DbSession, page: Page = 0, page_size: PageSize = 20,
+                    q: Search | None = None, category_id: UUID | None = None):
+    return public_service.list_products(session, page, page_size, q=q, category_id=category_id)
+
+
+@public_router.get("/products/{product_id}", response_model=PublicProductResponse)
+def public_product_detail(product_id: UUID, session: DbSession):
+    return perform(lambda: public_service.product_detail(session, product_id))
+
+
+@public_router.get("/shops/{seller_id}/products", response_model=PublicProductList)
+def shop_products(seller_id: UUID, session: DbSession, page: Page = 0, page_size: PageSize = 20,
+                  category_id: UUID | None = None):
+    try:
+        seller_service.get_public_shop(session, seller_id)
+    except seller_service.SellerProfileNotFound:
+        raise HTTPException(404, detail={"code": "SHOP_NOT_FOUND"}) from None
+    return public_service.list_products(session, page, page_size, seller_id=seller_id, category_id=category_id)
+
+
+@public_router.get("/categories/{category_id}/products", response_model=PublicProductList)
+def category_products(category_id: UUID, session: DbSession, page: Page = 0, page_size: PageSize = 20):
+    perform(lambda: public_service.require_active_category(session, category_id))
+    return public_service.list_products(session, page, page_size, category_id=category_id)
 
 
 @router.get("/categories", response_model=CategoryList)
