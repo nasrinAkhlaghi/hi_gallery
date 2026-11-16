@@ -108,6 +108,12 @@ Admin review uses the existing Seller and append-only `seller_status_history` ta
 
 Approval (`PENDING` → `ACTIVE`) and rejection (`PENDING` → `REJECTED`) use a conditional database update that matches only the current PENDING status. The successful status update and audit insert commit in one transaction. Competing decisions serialize on the row update; one succeeds, while the other receives 409. Failed audit insertion rolls back the status update. Rejection requires a trimmed 1–2000 character reason. The authenticated Admin account supplies actor identity, and a seller cannot review their own application. The seller's application endpoint exposes the rejection reason from the latest rejection audit record only to that seller. Rejected-seller profile editing/resubmission and suspension remain unimplemented.
 
+### Planned storefront increment
+
+The [Storefront plan](09-storefront-plan.md) defines the next increment, not current functionality. Add shop-category/theme fields with a new migration, leaving historical migration inputs unchanged. The seller module owns authenticated shop settings and the public shop projection; the products module owns shared public product eligibility and search/filter queries. Require ACTIVE seller and account status in public queries and apply product visibility before pagination/counting. Use explicit public response schemas to exclude private account and application data.
+
+Frontend routes add `/shops/:sellerId` and replace Shop, Browse, Categories and Product Detail placeholders. Theme presets are code-defined and scoped to the shop presentation, so selecting a shop theme does not change Seller Studio or the global buyer interface. Saved settings come from the API; unsaved previews remain local UI state. Keep current media-access limitations explicit as described in the plan.
+
 ### Current security limitations
 
 - There is no login/register rate limiting, MFA, email verification, password reset, or account recovery flow in this phase.

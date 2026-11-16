@@ -3,6 +3,10 @@
 Base URL: `/api/v1`
 Format: JSON, UUID identifiers, ISO-8601 timestamps.
 
+## Planned storefront APIs
+
+The next increment introduces `/seller/shop`, `/shops/{sellerId}` and `/shops/{sellerId}/products`, and implements the public product discovery/detail endpoints listed below. These are planned, not available in the current product-management phase. Request/response fields, search, pagination, authorization and public visibility are specified in [Storefront plan — API contracts](09-storefront-plan.md#planned-api-contracts). Existing onboarding `/seller/profile` contracts remain unchanged; ACTIVE seller presentation edits use the separate shop endpoint.
+
 ## Authentication
 - POST `/auth/register`
 - POST `/auth/register/seller`

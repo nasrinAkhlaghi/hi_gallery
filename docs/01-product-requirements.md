@@ -30,6 +30,10 @@ Authentication, seller profile completion and explicit application submission, s
 ## Out of MVP
 Product Groups, automatic merging, AI search/recommendations, AI descriptions/image recognition, wishlist, following/social feed, messaging, coupons/loyalty/subscriptions, multi-language/currency, advanced shipping/analytics, microservices, Kafka, Kubernetes, Elasticsearch.
 
+## Planned Storefront Increment
+
+Approved sellers will select an optional primary shop category and a built-in theme, manage shop presentation, and link to a public shop page showing their published products. Buyers will browse products and open product detail and seller shop pages without signing in. Product categories remain independent from the shop category. See [Storefront plan](09-storefront-plan.md) for the planned scope, visibility rules, contracts and acceptance checks. These additions are not implemented yet.
+
 ## Future AI
 Semantic search, product similarity, category suggestions, recommendations. PostgreSQL remains the transactional source of truth.
 

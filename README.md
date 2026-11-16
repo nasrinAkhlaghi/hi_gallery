@@ -32,6 +32,8 @@ Read every file under `docs/` before implementing features. They define product 
 
 Do not invent undefined business rules. Ask when specifications conflict. Implement incrementally.
 
+The planned next increment is [shop customization and public storefronts](docs/09-storefront-plan.md): an optional shop category, built-in themes, a public seller shop page, and buyer product discovery/detail. The plan includes API contracts, migration scope, implementation order and acceptance checks; these features are not implemented yet.
+
 ## Core Flow
 Seller registration → Store profile draft → Explicit submission for review → Admin approval → Product creation → Buyer discovery → Cart → Checkout → Payment → Order → Seller fulfillment → Buyer review.
 

@@ -39,6 +39,12 @@ Unknown resource → 404.
 9 Reviews
 10 Admin dashboard
 
+## Planned Shop and Public Discovery Flow
+
+ACTIVE seller → Shop → Edit shop details → Choose optional primary shop category → Choose built-in theme → Preview → Save → Open public shop. Shop links to Products → Add Product using the existing product form. Published products appear under the saved shop presentation.
+
+Signed-out or signed-in visitor → Browse/Search/Category → Product Detail → Seller link → Public Shop → Product Detail. An available shop without published products shows an empty state. Unavailable shops and unpublished product detail return 404. Cart and checkout remain later work. See [Storefront plan](09-storefront-plan.md) for precise visibility, contracts and acceptance checks; this flow is not implemented yet.
+
 ## Future AI
 Natural-language query → AI/Search → normal product list.
 Product → Similarity → similar products.
