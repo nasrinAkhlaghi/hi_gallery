@@ -69,7 +69,10 @@ async def request_validation_error_handler(request: Request, exc: RequestValidat
     ]
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content=_error_body("VALIDATION_ERROR", "Request validation failed", safe_details),
+        content=_error_body(
+            "INVALID_SHOP_THEME" if any(error["code"] == "INVALID_SHOP_THEME" for error in safe_details) else "VALIDATION_ERROR",
+            "Request validation failed", safe_details,
+        ),
     )
 
 

@@ -7,8 +7,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.modules.auth.models import Account
+from app.modules.categories.models import Category
 from app.modules.seller.models import Seller, SellerStatusHistory
-from app.modules.seller.schemas import SellerProfileUpdate
+from app.modules.seller.schemas import SellerProfileUpdate, SellerShopUpdate
 
 
 class SellerProfileNotFound(Exception):
@@ -27,6 +28,14 @@ class SellerOnboardingForbidden(Exception):
     pass
 
 
+class SellerShopForbidden(Exception):
+    pass
+
+
+class ShopCategoryUnavailable(Exception):
+    pass
+
+
 def _lock_seller_for_account(session: Session, account_id: UUID) -> Seller:
     seller = session.scalar(select(Seller).where(Seller.account_id == account_id).with_for_update())
     if seller is None:
@@ -38,6 +47,33 @@ def get_seller_profile(session: Session, account_id: UUID) -> Seller:
     seller = session.scalar(select(Seller).where(Seller.account_id == account_id))
     if seller is None:
         raise SellerProfileNotFound
+    return seller
+
+
+def update_seller_shop(session: Session, account: Account, body: SellerShopUpdate) -> Seller:
+    try:
+        seller = session.scalar(
+            select(Seller).where(Seller.account_id == account.id)
+            .with_for_update().execution_options(populate_existing=True)
+        )
+        if seller is None:
+            raise SellerProfileNotFound
+        if seller.status != "ACTIVE":
+            raise SellerShopForbidden
+        changes = body.model_dump(exclude_unset=True)
+        category_id = changes.get("shop_category_id")
+        if category_id is not None and category_id != seller.shop_category_id:
+            category = session.scalar(select(Category).where(Category.id == category_id).with_for_update())
+            if category is None or category.status != "ACTIVE":
+                raise ShopCategoryUnavailable
+        for field, value in changes.items():
+            setattr(seller, field, value)
+        seller.updated_at = datetime.now(timezone.utc)
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    session.refresh(seller)
     return seller
 
 

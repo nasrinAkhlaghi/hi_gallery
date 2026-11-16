@@ -1,4 +1,4 @@
-"""Seller-owned onboarding and profile endpoints."""
+"""Seller-owned onboarding, profile and approved-shop settings endpoints."""
 
 from typing import Annotated
 
@@ -14,11 +14,14 @@ from app.modules.seller.schemas import (
     SellerApplicationResponse,
     SellerProfileResponse,
     SellerProfileUpdate,
+    SellerShopResponse,
+    SellerShopUpdate,
 )
 
 router = APIRouter(prefix="/api/v1/seller", tags=["seller onboarding"])
 DbSession = Annotated[Session, Depends(get_db)]
 SellerAccount = Annotated[Account, Depends(require_roles(Role.SELLER))]
+ActiveSellerAccount = Annotated[Account, Depends(require_roles(Role.SELLER, active_seller=True))]
 
 
 def _profile_or_http_error(action):
@@ -32,6 +35,20 @@ def _profile_or_http_error(action):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail={"code": "SELLER_PROFILE_NOT_EDITABLE"}) from None
     except service.SellerApplicationConflict:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail={"code": "INVALID_APPLICATION_TRANSITION"}) from None
+    except service.SellerShopForbidden:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"code": "SELLER_NOT_ACTIVE"}) from None
+    except service.ShopCategoryUnavailable:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail={"code": "CATEGORY_UNAVAILABLE"}) from None
+
+
+@router.get("/shop", response_model=SellerShopResponse)
+def get_shop(session: DbSession, account: ActiveSellerAccount):
+    return _profile_or_http_error(lambda: service.get_seller_profile(session, account.id))
+
+
+@router.patch("/shop", response_model=SellerShopResponse)
+def patch_shop(body: SellerShopUpdate, session: DbSession, account: ActiveSellerAccount):
+    return _profile_or_http_error(lambda: service.update_seller_shop(session, account, body))
 
 
 @router.get("/profile", response_model=SellerProfileResponse)

@@ -22,6 +22,8 @@ class Seller(Base):
     __tablename__ = "seller"
     __table_args__ = (
         CheckConstraint("status IN ('DRAFT','PENDING','ACTIVE','SUSPENDED','REJECTED')", name="ck_seller_status"),
+        CheckConstraint("theme_id IN ('gallery','linen','clay')", name="ck_seller_theme_id"),
+        Index("idx_seller_shop_category", "shop_category_id"),
     )
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
@@ -29,6 +31,8 @@ class Seller(Base):
     shop_name: Mapped[str] = mapped_column(String(150), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     logo_url: Mapped[str | None] = mapped_column(Text)
+    shop_category_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), ForeignKey("category.id"))
+    theme_id: Mapped[str] = mapped_column(String(30), nullable=False, default="gallery", server_default=text("'gallery'"))
     status: Mapped[str] = mapped_column(String(30), nullable=False, server_default=text("'DRAFT'"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=text("now()"))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=text("now()"))

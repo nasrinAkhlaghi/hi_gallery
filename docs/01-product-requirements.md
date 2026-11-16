@@ -32,7 +32,7 @@ Product Groups, automatic merging, AI search/recommendations, AI descriptions/im
 
 ## Planned Storefront Increment
 
-Approved sellers will select an optional primary shop category and a built-in theme, manage shop presentation, and link to a public shop page showing their published products. Buyers will browse products and open product detail and seller shop pages without signing in. Product categories remain independent from the shop category. See [Storefront plan](09-storefront-plan.md) for the planned scope, visibility rules, contracts and acceptance checks. These additions are not implemented yet.
+Approved sellers will select an optional primary shop category and a built-in theme, manage shop presentation, and link to a public shop page showing their published products. Buyers will browse products and open product detail and seller shop pages without signing in. Product categories remain independent from the shop category. See [Storefront plan](09-storefront-plan.md) for the planned scope, visibility rules, contracts and acceptance checks. Step 1 (shop settings persistence and API) is implemented; the public shop and buyer pages remain planned.
 
 ## Future AI
 Semantic search, product similarity, category suggestions, recommendations. PostgreSQL remains the transactional source of truth.

@@ -2,9 +2,11 @@
 
 from datetime import datetime
 from uuid import UUID
+from typing import Literal
 from urllib.parse import urlsplit
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic_core import PydanticCustomError
 
 
 class SellerProfileUpdate(BaseModel):
@@ -58,6 +60,30 @@ class SellerProfileResponse(BaseModel):
     logo_url: str | None
     status: str
     created_at: datetime
+    updated_at: datetime
+
+
+class SellerShopUpdate(SellerProfileUpdate):
+    shop_category_id: UUID | None = None
+    theme_id: str | None = None
+
+    @field_validator("theme_id", mode="before")
+    @classmethod
+    def validate_theme(cls, value: object) -> str:
+        if not isinstance(value, str) or value not in {"gallery", "linen", "clay"}:
+            raise PydanticCustomError("INVALID_SHOP_THEME", "Choose gallery, linen or clay")
+        return value
+
+
+class SellerShopResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    shop_name: str
+    description: str | None
+    logo_url: str | None
+    shop_category_id: UUID | None
+    theme_id: Literal["gallery", "linen", "clay"]
     updated_at: datetime
 
 

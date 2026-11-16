@@ -1,4 +1,4 @@
--- HI Gallery current schema reference after migrations 0001-0003.
+-- HI Gallery current schema reference after migrations 0001-0004.
 -- The immutable 0001 initial-schema source remains backend/alembic/schema.sql.
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
@@ -32,16 +32,30 @@ CREATE TABLE buyer (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE TABLE category (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    parent_id UUID REFERENCES category(id),
+    name VARCHAR(150) NOT NULL,
+    slug VARCHAR(180) NOT NULL UNIQUE,
+    status VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT ck_category_status CHECK (status IN ('ACTIVE','INACTIVE'))
+);
+
 CREATE TABLE seller (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     account_id UUID NOT NULL UNIQUE REFERENCES account(id),
     shop_name VARCHAR(150) NOT NULL,
     description TEXT,
     logo_url TEXT,
+    shop_category_id UUID REFERENCES category(id),
+    theme_id VARCHAR(30) NOT NULL DEFAULT 'gallery',
     status VARCHAR(30) NOT NULL DEFAULT 'DRAFT',
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT ck_seller_status CHECK (status IN ('DRAFT','PENDING','ACTIVE','SUSPENDED','REJECTED'))
+    CONSTRAINT ck_seller_status CHECK (status IN ('DRAFT','PENDING','ACTIVE','SUSPENDED','REJECTED')),
+    CONSTRAINT ck_seller_theme_id CHECK (theme_id IN ('gallery','linen','clay'))
 );
 
 CREATE TABLE seller_status_history (
@@ -72,17 +86,6 @@ CREATE TABLE admin (
     status VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE TABLE category (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    parent_id UUID REFERENCES category(id),
-    name VARCHAR(150) NOT NULL,
-    slug VARCHAR(180) NOT NULL UNIQUE,
-    status VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT ck_category_status CHECK (status IN ('ACTIVE','INACTIVE'))
 );
 
 CREATE TABLE product (
@@ -216,3 +219,5 @@ CREATE INDEX ix_seller_status_history_actor_account ON seller_status_history(act
 CREATE INDEX ix_refresh_tokens_account_id ON refresh_tokens(account_id);
 CREATE INDEX ix_refresh_tokens_family_id ON refresh_tokens(family_id);
 CREATE INDEX ix_refresh_tokens_expires_at ON refresh_tokens(expires_at);
+
+CREATE INDEX idx_seller_shop_category ON seller(shop_category_id);

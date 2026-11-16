@@ -55,9 +55,9 @@ Order 1—N Review
 ## Product Group
 Not an MVP transactional entity. Future grouping may be performed by Admin or AI. Equal product names do not mean equal products.
 
-## Planned shop presentation fields
+## Shop presentation fields
 
-The next increment adds an optional primary `Seller.shop_category_id` referencing Category and a built-in `Seller.theme_id` defaulting to `gallery`. Category 1—N Seller is independent of Category 1—N Product: changing a shop category never changes product categories. These fields are planned and absent from the current schema. Public visibility requires an ACTIVE seller and owning account; products must additionally be ACTIVE or SOLD_OUT. See [Storefront plan](09-storefront-plan.md) for full rules and migration scope.
+Migration `0004_shop_settings` adds an optional primary `Seller.shop_category_id` referencing Category and a built-in `Seller.theme_id` defaulting to `gallery`. Category 1—N Seller is independent of Category 1—N Product: changing a shop category never changes product categories. These fields are in the model and current schema reference; existing sellers receive no primary category and the default theme. The settings API allows only ACTIVE sellers to edit presentation without changing approval state. Public visibility requires an ACTIVE seller and owning account; products must additionally be ACTIVE or SOLD_OUT. See [Storefront plan](09-storefront-plan.md) for full rules and migration scope.
 
 ## Aggregate Guidance
 Use clear module boundaries around Account, Buyer, Seller, Product, Cart, Order/SellerOrder, Review. Avoid uncontrolled cross-module persistence access.

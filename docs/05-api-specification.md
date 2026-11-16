@@ -5,7 +5,7 @@ Format: JSON, UUID identifiers, ISO-8601 timestamps.
 
 ## Planned storefront APIs
 
-The next increment introduces `/seller/shop`, `/shops/{sellerId}` and `/shops/{sellerId}/products`, and implements the public product discovery/detail endpoints listed below. These are planned, not available in the current product-management phase. Request/response fields, search, pagination, authorization and public visibility are specified in [Storefront plan — API contracts](09-storefront-plan.md#planned-api-contracts). Existing onboarding `/seller/profile` contracts remain unchanged; ACTIVE seller presentation edits use the separate shop endpoint.
+`GET/PATCH /seller/shop` is implemented for ACTIVE sellers. Public `/shops/{sellerId}`, `/shops/{sellerId}/products` and buyer product discovery/detail remain planned. Request/response fields, search, pagination, authorization and public visibility are specified in [Storefront plan — API contracts](09-storefront-plan.md#planned-api-contracts). Existing onboarding `/seller/profile` contracts remain unchanged; ACTIVE seller presentation edits use the separate shop endpoint.
 
 ## Authentication
 - POST `/auth/register`
@@ -85,6 +85,8 @@ The migration creates `refresh_tokens` with UUID identity/account/family referen
 - PATCH `/seller/profile`
 - GET `/seller/application`
 - POST `/seller/application/submit`
+- GET `/seller/shop`
+- PATCH `/seller/shop`
 - GET `/seller/dashboard`
 - GET `/seller/products`
 - POST `/seller/products`
@@ -118,6 +120,14 @@ After Phase 4.2, this response also includes `rejection_reason` for the authenti
 `POST /seller/application/submit` accepts an empty body. It atomically changes `DRAFT` to `PENDING`, adds a `DRAFT` → `PENDING` seller lifecycle audit event, and returns the application status. Only a DRAFT can be submitted; duplicate or concurrent submissions return `409 INVALID_APPLICATION_TRANSITION`. Pending sellers may read profile and status but cannot edit or submit again. Rejected-seller editing/resubmission is planned for a later phase; Admin review and decision endpoints are not implemented in Phase 4.1.
 
 The seller status history is append-only. Phase 4.1 records seller registration (`NULL` → `DRAFT`) and application submission (`DRAFT` → `PENDING`) with actor type `SELLER` and identity derived from the authenticated account. The migration does not fabricate events for sellers that existed before it; historical PENDING rows remain PENDING and have no synthetic history.
+
+### Shop settings (storefront step 1)
+
+`GET /seller/shop` and `PATCH /seller/shop` require an authenticated ACTIVE account with an ACTIVE Seller profile. GET returns `{id,shop_name,description,logo_url,shop_category_id,theme_id,updated_at}` for the caller; private account/application fields are excluded.
+
+PATCH requires the existing CSRF and Origin checks and at least one supplied field from `{shop_name,description,logo_url,shop_category_id,theme_id}`. Profile field validation matches `/seller/profile`. Explicit null is allowed for description, logo and category, but not name/theme. Theme must be `gallery`, `linen` or `clay`; invalid values return `422 INVALID_SHOP_THEME`. New category assignments require an ACTIVE category (`422 CATEGORY_UNAVAILABLE`); the current disabled category can be retained. Unknown fields and client-supplied seller/account/status fields are rejected with `422 VALIDATION_ERROR`.
+
+Updates lock and recheck the caller's seller, validate before changing fields, and commit atomically. Saving does not change seller approval, audit history or product categories. The onboarding `/seller/profile` endpoint remains editable only in DRAFT. Apply migration `0004_shop_settings` before using the updated API. Public shop pages and the Shop UI remain future work.
 
 ### Seller products
 

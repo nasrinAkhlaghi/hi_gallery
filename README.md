@@ -32,7 +32,7 @@ Read every file under `docs/` before implementing features. They define product 
 
 Do not invent undefined business rules. Ask when specifications conflict. Implement incrementally.
 
-The planned next increment is [shop customization and public storefronts](docs/09-storefront-plan.md): an optional shop category, built-in themes, a public seller shop page, and buyer product discovery/detail. The plan includes API contracts, migration scope, implementation order and acceptance checks; these features are not implemented yet.
+The planned next increment is [shop customization and public storefronts](docs/09-storefront-plan.md): an optional shop category, built-in themes, a public seller shop page, and buyer product discovery/detail. The plan includes API contracts, migration scope, implementation order and acceptance checks; step 1 (shop settings fields and API) is implemented, while public endpoints and storefront UI remain planned.
 
 ## Core Flow
 Seller registration → Store profile draft → Explicit submission for review → Admin approval → Product creation → Buyer discovery → Cart → Checkout → Payment → Order → Seller fulfillment → Buyer review.
@@ -42,6 +42,8 @@ AI/search enhancements are planned for later phases and are not part of the MVP.
 Seller product management is now implemented: approved sellers can list/filter/paginate, create, edit and delete their own products, choose active categories, set draft/publication status, and upload/remove local product images. Buyer browsing and the purchase flow remain future work. See the [Persian Windows run and testing guide](docs/08-local-testing-fa.md) for setup, a local Admin/category seed, and the complete manual test path. Product management reuses the existing tables and does not add a migration.
 
 Local images require Pillow (`pip install -r requirements.txt` from `backend/`). Upload accepts JPEG/PNG/WebP, up to 5 MiB and 16 million pixels; files are validated and re-encoded before storage in `backend/uploads/products` (override with `PRODUCT_UPLOAD_DIR`). Image URLs are public and served by the API under `/media/products/`; both database records and files must be preserved across restarts. Local upload is disabled in production pending a durable storage integration. The Vite development proxy forwards `/media` to the API.
+
+Shop settings API is implemented for approved sellers: `GET/PATCH /api/v1/seller/shop` supports shop details, one optional primary category and built-in themes (`gallery`, `linen`, `clay`). Apply migration `0004_shop_settings` with `alembic upgrade head` from `backend/` after reviewing the target database. Existing sellers retain their status and products, default to `gallery` and have no primary shop category. The Shop UI is still a placeholder; the next implementation step is public shop/product APIs.
 
 ## Local Development
 
