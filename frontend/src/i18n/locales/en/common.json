@@ -1,4 +1,23 @@
 {
+  "sellerProducts": {
+    "title": "Your products", "add": "Add product", "editTitle": "Edit product", "edit": "Edit product",
+    "filter": "Filter by status", "all": "All statuses", "loading": "Loading products…", "empty": "No products match this view.",
+    "price": "Price", "stock": "Stock", "name": "Product name", "description": "Description (optional)",
+    "category": "Category", "chooseCategory": "Choose a category", "existingCategory": "Current category (unavailable for new products)",
+    "noCategories": "No active categories are available. Ask the platform operator to add categories before creating products.",
+    "statusLabel": "Product status", "status": { "DRAFT": "Draft", "ACTIVE": "Published", "INACTIVE": "Inactive", "SOLD_OUT": "Sold out" },
+    "publishHint": "Save as Draft to keep working, or choose Published when ready. Buyer browsing is coming in the next phase.",
+    "save": "Save product", "saved": "Product saved.", "working": "Please wait…", "back": "Back to products",
+    "images": "Product images", "upload": "Upload image", "imageHint": "JPEG, PNG or WebP, up to 5 MB and 16 million pixels. Upload order determines display order. The first image is the cover.",
+    "saveBeforeImages": "Save the product first, then upload its images.", "noImages": "No images uploaded yet.",
+    "imageAlt": "{{name}}, image {{number}}", "removeImage": "Remove image {{number}}", "imageAdded": "Image uploaded.", "imageRemoved": "Image removed.",
+    "delete": "Delete product", "confirmDelete": "Permanently delete this product and its images?", "confirmImageDelete": "Permanently remove this image?",
+    "confirm": "Confirm deletion", "cancel": "Cancel", "pagination": "Product pages", "previous": "Previous", "next": "Next", "page": "Page {{current}} of {{total}}", "retry": "Try again",
+    "inUse": "This product is referenced by a cart, order or review and cannot be deleted. You can mark it inactive instead.",
+    "categoryUnavailable": "This category is unavailable. Choose an active category.", "notFound": "This product could not be found.",
+    "forbidden": "Only approved sellers can manage their own products.", "imageError": "Choose a valid, non-animated JPEG, PNG or WebP image under 5 MB and 16 million pixels.",
+    "validationError": "Check the product name, category, price (up to two decimal places) and whole-number stock.", "requestError": "We could not complete the request. Please try again."
+  },
   "app": {
     "name": "HI Gallery",
     "documentTitle": "HI Gallery — Human-made, by design",

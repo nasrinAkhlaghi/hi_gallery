@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     auth_audience: str = "hi-gallery-web"
     environment: Literal["development", "test", "production"] = "development"
     cors_allowed_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+    product_upload_dir: Path = REPOSITORY_ROOT / "backend" / "uploads" / "products"
 
     model_config = SettingsConfigDict(
         env_file=REPOSITORY_ROOT / ".env",

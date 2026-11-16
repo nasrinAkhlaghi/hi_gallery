@@ -1,4 +1,6 @@
 import re
+import subprocess
+import sys
 from pathlib import Path
 
 from sqlalchemy import CheckConstraint, ForeignKeyConstraint, UniqueConstraint
@@ -14,6 +16,17 @@ DOCUMENTED_TABLES = {
     "seller_status_history", "refresh_tokens",
 }
 EXPECTED_TABLES = DOCUMENTED_TABLES
+
+
+def test_application_registers_all_models_in_a_fresh_process() -> None:
+    # Other tests import app.db.models during collection, masking missing runtime imports.
+    result = subprocess.run(
+        [sys.executable, "-c", "from app.main import app; from app.db.session import Base; "
+         "from sqlalchemy.orm import configure_mappers; configure_mappers(); "
+         "assert 'payment' in Base.metadata.tables; assert len(Base.metadata.tables) == 16"],
+        cwd=Path(__file__).resolve().parents[1], capture_output=True, text=True, timeout=30,
+    )
+    assert result.returncode == 0, result.stderr
 
 
 def test_all_documented_entities_are_registered_with_alembic_metadata() -> None:

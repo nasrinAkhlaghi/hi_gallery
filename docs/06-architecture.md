@@ -108,6 +108,14 @@ Admin review uses the existing Seller and append-only `seller_status_history` ta
 
 Approval (`PENDING` → `ACTIVE`) and rejection (`PENDING` → `REJECTED`) use a conditional database update that matches only the current PENDING status. The successful status update and audit insert commit in one transaction. Competing decisions serialize on the row update; one succeeds, while the other receives 409. Failed audit insertion rolls back the status update. Rejection requires a trimmed 1–2000 character reason. The authenticated Admin account supplies actor identity, and a seller cannot review their own application. The seller's application endpoint exposes the rejection reason from the latest rejection audit record only to that seller. Rejected-seller profile editing/resubmission and suspension remain unimplemented.
 
+### Seller product management
+
+The products module owns approved-seller CRUD, status filtering/pagination, category assignment and local image storage. Every seller endpoint requires an ACTIVE Seller profile and scopes resource lookup to that seller; product mutation and image sort-order allocation lock the product row. Decimal prices use the existing numeric(12,2) schema and JSON strings; no currency or automatic stock/status transition is introduced. Existing category, product and product_image tables are reused without a migration. Referenced products cannot be deleted.
+
+The public category endpoint supplies active categories. Development setup is an explicit operator command (`python -m app.seed_dev`) that creates a local Admin and missing sample categories; it neither promotes existing accounts nor resets existing passwords.
+
+Local uploads stream a bounded binary body, validate/decode JPEG/PNG/WebP through Pillow and re-encode pixels into generated filenames. The API serves only files with matching image records. The frontend resolves media URLs against the API origin, and the development server proxies `/media`; the service worker excludes media to avoid retaining deleted product images. Local storage is deliberately unavailable for uploads in production, pending a durable storage integration. Database/file operations are not atomic across process crashes; orphan cleanup after a committed deletion is best effort and logged. Public buyer browsing, image reorder, cloud storage and checkout remain future work.
+
 ### Planned storefront increment
 
 The [Storefront plan](09-storefront-plan.md) defines the next increment, not current functionality. Add shop-category/theme fields with a new migration, leaving historical migration inputs unchanged. The seller module owns authenticated shop settings and the public shop projection; the products module owns shared public product eligibility and search/filter queries. Require ACTIVE seller and account status in public queries and apply product visibility before pagination/counting. Use explicit public response schemas to exclude private account and application data.

@@ -119,6 +119,20 @@ After Phase 4.2, this response also includes `rejection_reason` for the authenti
 
 The seller status history is append-only. Phase 4.1 records seller registration (`NULL` → `DRAFT`) and application submission (`DRAFT` → `PENDING`) with actor type `SELLER` and identity derived from the authenticated account. The migration does not fabricate events for sellers that existed before it; historical PENDING rows remain PENDING and have no synthetic history.
 
+### Seller products
+
+Product management endpoints require an authenticated ACTIVE Seller. Ownership is always taken from the current account; foreign and unknown products/images return 404. Mutations use the existing CSRF and Origin checks. No seller/actor IDs are accepted in product payloads.
+
+- `GET /seller/products?page=0&page_size=20&status=DRAFT` returns `{items,total,page,page_size}`. Status is optional; page is zero-based and size is 1–100. Results sort by creation time descending, then UUID.
+- `POST /seller/products` creates a product (201). `PUT /seller/products/{id}` replaces the editable fields (200). Both accept `{name,description,category_id,price,stock,status}`. Name is trimmed, nonblank, up to 255 characters; description is optional up to 10,000. Price is nonnegative, numeric(12,2), at most two decimal places, and serialized as a decimal string. Stock is an integer from 0 to 2147483647. Status is DRAFT (default), ACTIVE, INACTIVE or SOLD_OUT. There is no automatic stock/status transition in this phase. No currency is inferred; selecting a currency remains a product decision before checkout.
+- `GET /seller/products/{id}` and writes return `{id,name,description,category_id,price,stock,status,created_at,updated_at,images}`. Each image has `{id,url,sort_order}`. Images are sorted in upload order; the first is the cover.
+- `DELETE /seller/products/{id}` returns 204 and removes its images. A product referenced by a cart, order or review returns `409 PRODUCT_IN_USE`; references are preserved. The seller can choose INACTIVE instead.
+- `GET /categories?page=0&page_size=20` publicly returns `{items,total,page,page_size}`, with active categories sorted by name then UUID. Each item has `{id,parent_id,name,slug}`. New product assignments require an active category (`422 CATEGORY_UNAVAILABLE` otherwise). An existing product can retain its current disabled category while other fields are edited.
+- `POST /seller/products/{id}/images` takes the image file bytes as the request body, with `Content-Type: image/jpeg`, `image/png` or `image/webp` (not JSON or multipart). Returns the new image with 201. The streamed body is bounded to 5 MiB (413 on excess); decoded dimensions are bounded to 16 million pixels. Empty, mismatched, malformed, animated and unsupported files return `422 INVALID_PRODUCT_IMAGE`. Files are decoded and re-encoded without original metadata, stored with generated UUID filenames, and served publicly under `/media/products/{filename}` only while their database record exists. No source filename or remote URL is accepted. Local uploads are development-only; production returns `503 LOCAL_UPLOADS_DEVELOPMENT_ONLY` until durable storage is integrated.
+- `DELETE /seller/products/{id}/images/{imageId}` returns 204. Database writes commit before local files are removed; failed image inserts clean up their new file. If post-commit file cleanup fails, the orphan is logged and no longer served. A process crash between disk and database writes may leave an orphan; local storage is not a distributed transaction.
+
+Product publication currently controls stored status. Public buyer product listing/detail is not implemented in this phase. Products and media use existing schema tables; no migration is added. Development-only sample categories and a local Admin can be provisioned explicitly with `python -m app.seed_dev`; existing users are never promoted and existing passwords are not reset.
+
 ## Admin
 - GET `/admin/dashboard`
 - GET `/admin/sellers`

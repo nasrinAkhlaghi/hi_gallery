@@ -15,6 +15,7 @@ function installDefaultFetch() {
   if (path.endsWith("/auth/me")) return new Response(JSON.stringify(testUser), { status: 200 });
   if (path.endsWith("/auth/refresh")) return new Response(JSON.stringify(testUser), { status: 200 });
   if (path.endsWith("/auth/logout")) return new Response(null, { status: 204 });
+  if (path.includes("/seller/products?") || path.includes("/categories?")) return new Response(JSON.stringify({ items: [], total: 0, page: 0, page_size: 20 }), { status: 200 });
   return new Response(JSON.stringify(testUser), { status: 200 });
   }));
 }

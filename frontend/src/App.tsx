@@ -9,6 +9,7 @@ import { AuthControls } from "./auth/AuthControls";
 import { LoginPage, RegistrationPage, RequireAuth } from "./auth/AuthPages";
 import { useAuth } from "./auth/AuthContext";
 import { SellerOnboardingPage } from "./seller/SellerOnboardingPage";
+import { SellerProductsPage, SellerProductFormPage } from "./seller/SellerProductsPage";
 import { AdminSellerDetailPage, AdminSellerListPage } from "./admin/AdminSellerReviewPage";
 
 const categories = ["ceramics", "textiles", "jewelry", "homeObjects"] as const;
@@ -194,7 +195,9 @@ function App() {
         <Route path="/seller" element={<RequireAuth role="SELLER"><WorkspaceLayout area="seller" /></RequireAuth>}>
           <Route index element={<SellerWorkspaceIndex />} />
           <Route path="onboarding" element={<SellerOnboardingPage />} />
-          <Route path="products" element={<RequireAuth activeSeller><RoutePlaceholder titleKey="pages.products" /></RequireAuth>} />
+          <Route path="products" element={<RequireAuth activeSeller><SellerProductsPage /></RequireAuth>} />
+          <Route path="products/new" element={<RequireAuth activeSeller><SellerProductFormPage /></RequireAuth>} />
+          <Route path="products/:productId" element={<RequireAuth activeSeller><SellerProductFormPage /></RequireAuth>} />
           <Route path="orders" element={<RequireAuth activeSeller><RoutePlaceholder titleKey="pages.orders" /></RequireAuth>} />
           <Route path="shop" element={<RequireAuth activeSeller><RoutePlaceholder titleKey="pages.shop" /></RequireAuth>} />
           <Route path="settings" element={<RequireAuth activeSeller><RoutePlaceholder titleKey="pages.settings" /></RequireAuth>} />

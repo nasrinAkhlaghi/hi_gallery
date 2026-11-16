@@ -39,6 +39,10 @@ Seller registration → Store profile draft → Explicit submission for review �
 
 AI/search enhancements are planned for later phases and are not part of the MVP.
 
+Seller product management is now implemented: approved sellers can list/filter/paginate, create, edit and delete their own products, choose active categories, set draft/publication status, and upload/remove local product images. Buyer browsing and the purchase flow remain future work. See the [Persian Windows run and testing guide](docs/08-local-testing-fa.md) for setup, a local Admin/category seed, and the complete manual test path. Product management reuses the existing tables and does not add a migration.
+
+Local images require Pillow (`pip install -r requirements.txt` from `backend/`). Upload accepts JPEG/PNG/WebP, up to 5 MiB and 16 million pixels; files are validated and re-encoded before storage in `backend/uploads/products` (override with `PRODUCT_UPLOAD_DIR`). Image URLs are public and served by the API under `/media/products/`; both database records and files must be preserved across restarts. Local upload is disabled in production pending a durable storage integration. The Vite development proxy forwards `/media` to the API.
+
 ## Local Development
 
 ### Prerequisites

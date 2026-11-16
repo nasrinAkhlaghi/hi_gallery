@@ -7,14 +7,18 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette import status
+from sqlalchemy.orm import configure_mappers
 
 from app.core.config import get_settings
+from app.db import models  # noqa: F401 - register all relationship targets before handling requests
 from app.modules.auth.router import router as auth_router
 from app.modules.admin.router import router as admin_router
 from app.modules.seller.router import router as seller_router
+from app.modules.products.router import router as product_router, media_router
 
 # Validate required configuration before the application begins serving requests.
 get_settings()
+configure_mappers()
 
 settings = get_settings()
 app = FastAPI(title="HI Gallery API", version="0.2.0")
@@ -29,6 +33,8 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(seller_router)
 app.include_router(admin_router)
+app.include_router(product_router)
+app.include_router(media_router)
 
 
 def _error_body(code: str, message: str, details: object = None) -> dict[str, object]:
