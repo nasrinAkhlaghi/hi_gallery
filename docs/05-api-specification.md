@@ -92,7 +92,7 @@ All public product lists return `{items,total,page,page_size}` with zero-based p
 
 `GET /products` supports optional `q` (trimmed, maximum 200 characters, case-insensitive literal name substring) and `category_id` (exact category, without descendants). Search wildcards are treated literally; blank search adds no filter. Shop product lists support the same exact `category_id` filter. Well-formed filters with no matches return an empty page. Invalid query values/UUIDs return 422. `GET /categories/{categoryId}/products` requires an ACTIVE category or returns `404 CATEGORY_NOT_FOUND`. Disabling a category does not hide its published products from Browse or detail; it removes the category from active navigation and makes this dedicated category route unavailable.
 
-These endpoints are implemented; their frontend pages remain placeholders until the next UI tasks. The complete field contracts and acceptance criteria are in [Storefront plan](09-storefront-plan.md).
+These endpoints and their frontend pages are implemented. Public routes use `/shops/:sellerId`, `/browse`, `/categories` and `/products/:id`; URL filters persist search/category/page state, and purchase actions remain unavailable. The complete field contracts and acceptance criteria are in [Storefront plan](09-storefront-plan.md).
 
 ## Seller
 - GET `/seller/profile`
@@ -141,7 +141,7 @@ The seller status history is append-only. Phase 4.1 records seller registration 
 
 PATCH requires the existing CSRF and Origin checks and at least one supplied field from `{shop_name,description,logo_url,shop_category_id,theme_id}`. Profile field validation matches `/seller/profile`. Explicit null is allowed for description, logo and category, but not name/theme. Theme must be `gallery`, `linen` or `clay`; invalid values return `422 INVALID_SHOP_THEME`. New category assignments require an ACTIVE category (`422 CATEGORY_UNAVAILABLE`); the current disabled category can be retained. Unknown fields and client-supplied seller/account/status fields are rejected with `422 VALIDATION_ERROR`.
 
-Updates lock and recheck the caller's seller, validate before changing fields, and commit atomically. Saving does not change seller approval, audit history or product categories. The onboarding `/seller/profile` endpoint remains editable only in DRAFT. Apply migration `0004_shop_settings` before using the updated API. The approved-seller Shop settings UI is implemented. Public buyer pages remain future work.
+Updates lock and recheck the caller's seller, validate before changing fields, and commit atomically. Saving does not change seller approval, audit history or product categories. The onboarding `/seller/profile` endpoint remains editable only in DRAFT. Apply migration `0004_shop_settings` before using the updated API. The approved-seller Shop settings UI is implemented. Public buyer pages are implemented in step 4; full desktop/mobile browser verification remains pending.
 
 ### Seller products
 

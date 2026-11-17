@@ -16,7 +16,8 @@ function installDefaultFetch() {
   if (path.endsWith("/auth/refresh")) return new Response(JSON.stringify(testUser), { status: 200 });
   if (path.endsWith("/auth/logout")) return new Response(null, { status: 204 });
   if (path.endsWith("/seller/shop")) return new Response(JSON.stringify({ id: "shop-1", shop_name: "Test Studio", description: null, logo_url: null, shop_category_id: null, theme_id: "gallery", updated_at: "2026-11-17T00:00:00Z" }), { status: 200 });
-  if (path.includes("/seller/products?") || path.includes("/categories?")) return new Response(JSON.stringify({ items: [], total: 0, page: 0, page_size: 20 }), { status: 200 });
+  if (path.includes("/products?") || path.includes("/categories?")) return new Response(JSON.stringify({ items: [], total: 0, page: 0, page_size: 20 }), { status: 200 });
+  if (path.includes("/shops/") || path.endsWith("/products/sample-id")) return new Response(JSON.stringify({ code: "NOT_FOUND" }), { status: 404 });
   return new Response(JSON.stringify(testUser), { status: 200 });
   }));
 }

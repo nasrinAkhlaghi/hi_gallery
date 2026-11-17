@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowDownRight, ArrowUpRight, Flower2, Heart, Menu, Search, X } from "lucide-react";
-import { BrowserRouter, Link, Navigate, Route, Routes, useParams } from "react-router-dom";
+import { BrowserRouter, Link, Navigate, Route, Routes } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
 import { BuyerRoutePlaceholder, RoutePlaceholder, WorkspaceLayout } from "./components/RoutePlaceholder";
@@ -11,12 +11,11 @@ import { useAuth } from "./auth/AuthContext";
 import { SellerOnboardingPage } from "./seller/SellerOnboardingPage";
 import { SellerProductsPage, SellerProductFormPage } from "./seller/SellerProductsPage";
 import { SellerShopPage } from "./seller/SellerShopPage";
+import { BuyerLayout, CategoryTiles } from "./buyer/CatalogComponents";
+import { BrowsePage, CategoriesPage, ProductDetailPage, PublicShopPage } from "./buyer/CatalogPages";
 import { AdminSellerDetailPage, AdminSellerListPage } from "./admin/AdminSellerReviewPage";
-
-const categories = ["ceramics", "textiles", "jewelry", "homeObjects"] as const;
-
 const buyerNavigationItems = [
-  { labelKey: "navigation.discover", href: "#discover" },
+  { labelKey: "navigation.discover", to: "/browse" },
   { labelKey: "navigation.categories", to: "/categories" },
   { labelKey: "navigation.cart", to: "/cart" },
   { labelKey: "navigation.orders", to: "/orders" },
@@ -98,10 +97,10 @@ function HomePage() {
           <BuyerNavigationLinks />
         </nav>
         <div className="flex items-center gap-3">
-          <button className="grid h-11 w-11 place-items-center rounded-full border border-border focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" aria-label={t("navigation.search")}><Search size={17} /></button>
+          <Link to="/browse" className="grid h-11 w-11 place-items-center rounded-full border border-border focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" aria-label={t("navigation.search")}><Search size={17} /></Link>
           <LanguageSwitcher className="hidden md:block" />
           <span className="hidden sm:block"><AuthControls /></span>
-          <button className="hidden rounded-full bg-foreground px-5 py-3 text-sm text-background focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary lg:block">{t("actions.meetMakers")}</button>
+          <Link to="/browse" className="hidden rounded-full bg-foreground px-5 py-3 text-sm text-background focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary lg:block">{t("actions.meetMakers")}</Link>
           <button
             ref={mobileMenuButtonRef}
             type="button"
@@ -132,7 +131,7 @@ function HomePage() {
           <h1 className="max-w-xl font-display text-4xl leading-[1.07] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">{t("home.titleLineOne")}<br />{t("home.titleLineTwo")} <span className="font-serif italic text-primary">{t("home.titleHighlight")}</span><br />{t("home.titleLineThree")}</h1>
           <p className="mt-7 max-w-md text-base leading-7 text-muted-foreground">{t("home.description")}</p>
           <div className="mt-9 flex flex-wrap items-center gap-4">
-            <a className="inline-flex items-center gap-3 rounded-full bg-primary px-6 py-3.5 text-sm font-medium text-primary-foreground transition hover:opacity-90" href="#discover">{t("actions.exploreGallery")} <ArrowUpRight className="rtl:-scale-x-100" size={16} /></a>
+            <Link className="inline-flex items-center gap-3 rounded-full bg-primary px-6 py-3.5 text-sm font-medium text-primary-foreground transition hover:opacity-90" to="/browse">{t("actions.exploreGallery")} <ArrowUpRight className="rtl:-scale-x-100" size={16} /></Link>
             <span className="text-xs text-muted-foreground">{t("home.supportingLine")}</span>
           </div>
           <div className="mt-14 flex items-center gap-4 border-t border-border pt-6 text-xs text-muted-foreground"><span className="font-serif text-2xl italic text-foreground">01</span><span>{t("home.makerStatement")}</span><ArrowDownRight size={15} className="ms-auto rtl:-scale-x-100" /></div>
@@ -150,8 +149,8 @@ function HomePage() {
 
       <section id="categories" className="border-y border-border bg-[#f1ede5]">
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-12 lg:py-16">
-          <div className="mb-7 flex items-end justify-between"><div><p className="text-xs uppercase tracking-[0.18em] text-primary">{t("home.categoriesEyebrow")}</p><h2 className="mt-2 font-display text-3xl tracking-tight">{t("home.categoriesTitle")}</h2></div><a href="#discover" className="hidden text-sm underline underline-offset-4 sm:block">{t("actions.viewAll")}</a></div>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">{categories.map((category, index) => <a key={category} href="#discover" className="group flex min-h-28 items-end justify-between rounded-2xl bg-background p-5 transition hover:-translate-y-1 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"><span><span className="mb-3 block text-xs text-muted-foreground">0{index + 1}</span><span className="font-display text-lg">{t(`categories.${category}`)}</span></span><ArrowUpRight size={17} className="text-muted-foreground transition group-hover:text-primary rtl:-scale-x-100" /></a>)}</div>
+          <div className="mb-7 flex items-end justify-between"><div><p className="text-xs uppercase tracking-[0.18em] text-primary">{t("home.categoriesEyebrow")}</p><h2 className="mt-2 font-display text-3xl tracking-tight">{t("home.categoriesTitle")}</h2></div><Link to="/categories" className="hidden text-sm underline underline-offset-4 sm:block">{t("actions.viewAll")}</Link></div>
+          <CategoryTiles limit={4} />
         </div>
       </section>
 
@@ -159,15 +158,11 @@ function HomePage() {
         <p className="text-xs uppercase tracking-[0.18em] text-primary">{t("home.discoveryEyebrow")}</p>
         <h2 className="mx-auto mt-4 max-w-2xl font-display text-3xl tracking-tight sm:text-4xl">{t("home.discoveryTitle")}</h2>
         <p className="mx-auto mt-5 max-w-lg text-sm leading-6 text-muted-foreground">{t("home.discoveryDescription")}</p>
+        <Link to="/browse" className="mt-6 inline-flex min-h-11 items-center rounded-full bg-primary px-6 py-3 text-sm text-primary-foreground">{t("actions.exploreGallery")}</Link>
       </section>
       <footer id="about" className="border-t border-border px-6 py-7 text-center text-xs text-muted-foreground">{t("app.name")} <span className="mx-2">·</span> {t("home.footerTagline")}</footer>
     </main>
   );
-}
-
-function ProductPlaceholder() {
-  const { id } = useParams();
-  return <BuyerRoutePlaceholder titleKey="pages.productDetails" descriptionKey="pages.productDescription" descriptionOptions={{ id: `\u2068${id ?? ""}\u2069` }} />;
 }
 
 function SellerWorkspaceIndex() {
@@ -185,10 +180,12 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegistrationPage />} />
         <Route path="/register/seller" element={<RegistrationPage seller />} />
-        <Route path="/browse" element={<BuyerRoutePlaceholder titleKey="pages.browse" />} />
-        <Route path="/products/:id" element={<ProductPlaceholder />} />
-        <Route path="/categories" element={<BuyerRoutePlaceholder titleKey="pages.categories" />} />
-        <Route path="/shops/:sellerId" element={<BuyerRoutePlaceholder titleKey="pages.shop" />} />
+        <Route element={<BuyerLayout />}>
+          <Route path="/browse" element={<BrowsePage />} />
+          <Route path="/products/:id" element={<ProductDetailPage />} />
+          <Route path="/categories" element={<CategoriesPage />} />
+          <Route path="/shops/:sellerId" element={<PublicShopPage />} />
+        </Route>
         <Route path="/cart" element={<RequireAuth><BuyerRoutePlaceholder titleKey="pages.cart" /></RequireAuth>} />
         <Route path="/checkout" element={<RequireAuth><BuyerRoutePlaceholder titleKey="pages.checkout" /></RequireAuth>} />
         <Route path="/orders" element={<RequireAuth><BuyerRoutePlaceholder titleKey="pages.orders" /></RequireAuth>} />

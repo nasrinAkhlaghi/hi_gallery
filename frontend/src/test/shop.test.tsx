@@ -21,6 +21,8 @@ function installFetch(handler: (path: string, init?: RequestInit) => Response | 
     if (path.includes("/categories?")) return json({ items: categories, total: categories.length, page: 0, page_size: 100 });
     if (path.endsWith("/seller/profile")) return json({ ...original, status });
     if (path.endsWith("/seller/application")) return json({ status, can_edit: status === "DRAFT", can_submit: status === "DRAFT" });
+    if (path.includes("/shops/shop-1/products?")) return json({ items: [], total: 0, page: 0, page_size: 20 });
+    if (path.endsWith("/shops/shop-1")) return json({ ...original, category: null });
     return handler(path, init);
   }));
   return calls;
@@ -188,7 +190,7 @@ describe("seller shop settings", () => {
     expect(screen.getByRole("link", { name: "Add product" })).toHaveAttribute("href", "/seller/products/new");
     fireEvent.click(screen.getByRole("link", { name: "View shop" }));
     expect(window.location.pathname).toBe("/shops/shop-1");
-    expect(screen.getByRole("heading", { name: "Shop" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Clay Studio" })).toBeInTheDocument();
   });
 
   it("supports Persian RTL and falls back when a logo fails to load", async () => {
