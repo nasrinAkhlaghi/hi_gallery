@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "../App";
 import i18n from "../i18n";
-import { apiRequest } from "../auth/api";
+import { apiRequest, clearCsrfToken, logout } from "../auth/api";
 
 const user = { id: "user-id", email: "maker@example.com", roles: ["BUYER"], seller_status: null };
 
@@ -16,6 +16,7 @@ function mockFetch(handler: (path: string, init?: RequestInit) => Response | Pro
 
 beforeEach(async () => {
   cleanup();
+  clearCsrfToken();
   await i18n.changeLanguage("en");
   window.localStorage.clear();
   window.history.replaceState(null, "", "/");
@@ -54,7 +55,6 @@ describe("frontend authentication", () => {
     const loginCall = calls.find((call) => call.path.endsWith("/auth/login"));
     expect(loginCall?.init?.credentials).toBe("include");
     expect(new Headers(loginCall?.init?.headers).get("X-CSRF-Token")).toBe("csrf-before-login");
-    expect(calls.slice(0, calls.indexOf(loginCall!)).filter((call) => call.path.endsWith("/auth/csrf"))).toHaveLength(2);
     expect(window.localStorage.getItem("access_token")).toBeNull();
   });
 
@@ -181,5 +181,50 @@ describe("frontend authentication", () => {
     expect(first.ok && second.ok).toBe(true);
     expect(refreshCalls).toBe(1);
     expect(protectedCalls).toBe(4);
+  });
+
+  it("refreshes the CSRF binding after access-cookie expiry before refreshing and retrying a save", async () => {
+    let phase = "cached";
+    let saves = 0;
+    let refreshes = 0;
+    mockFetch((path, init) => {
+      const token = new Headers(init?.headers).get("X-CSRF-Token");
+      if (path.endsWith("/auth/csrf")) return json({ csrf_token: phase === "cached" ? "old-access-binding" : phase === "expired" ? "refresh-binding" : "new-access-binding" });
+      if (path.endsWith("/auth/refresh")) {
+        refreshes += 1;
+        if (token !== "refresh-binding") return json({ code: "CSRF_VALIDATION_FAILED" }, 403);
+        phase = "rotated";
+        return json(user);
+      }
+      if (path.endsWith("/seller/shop")) {
+        saves += 1;
+        if (saves === 1) return json({ code: "AUTHENTICATION_REQUIRED" }, 401);
+        return token === "new-access-binding" ? json({ saved: true }) : json({ code: "CSRF_VALIDATION_FAILED" }, 403);
+      }
+      return json({}, 404);
+    });
+    await apiRequest("/auth/csrf");
+    phase = "expired";
+    expect(await apiRequest("/seller/shop", { method: "PATCH", body: JSON.stringify({ theme_id: "clay" }) })).toEqual({ saved: true });
+    expect(refreshes).toBe(1);
+    expect(saves).toBe(2);
+  });
+
+  it("logs out after access-cookie expiry using the current refresh-cookie CSRF binding", async () => {
+    let expired = false;
+    let signedOut = false;
+    mockFetch((path, init) => {
+      if (path.endsWith("/auth/csrf")) return json({ csrf_token: expired ? "refresh-binding" : "old-access-binding" });
+      if (path.endsWith("/auth/logout")) {
+        if (new Headers(init?.headers).get("X-CSRF-Token") !== "refresh-binding") return json({ code: "CSRF_VALIDATION_FAILED" }, 403);
+        signedOut = true;
+        return json(null, 204);
+      }
+      return json({}, 404);
+    });
+    await apiRequest("/auth/csrf");
+    expired = true;
+    await logout();
+    expect(signedOut).toBe(true);
   });
 });

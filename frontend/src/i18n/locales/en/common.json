@@ -6,7 +6,7 @@
     "category": "Category", "chooseCategory": "Choose a category", "existingCategory": "Current category (unavailable for new products)",
     "noCategories": "No active categories are available. Ask the platform operator to add categories before creating products.",
     "statusLabel": "Product status", "status": { "DRAFT": "Draft", "ACTIVE": "Published", "INACTIVE": "Inactive", "SOLD_OUT": "Sold out" },
-    "publishHint": "Save as Draft to keep working, or choose Published when ready. Buyer browsing is coming in the next phase.",
+    "publishHint": "Save as Draft to keep working, or choose Published to show this product to buyers.",
     "save": "Save product", "saved": "Product saved.", "working": "Please wait…", "back": "Back to products",
     "images": "Product images", "upload": "Upload image", "imageHint": "JPEG, PNG or WebP, up to 5 MB and 16 million pixels. Upload order determines display order. The first image is the cover.",
     "saveBeforeImages": "Save the product first, then upload its images.", "noImages": "No images uploaded yet.",

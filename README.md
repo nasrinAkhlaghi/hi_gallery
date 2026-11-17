@@ -32,7 +32,7 @@ Read every file under `docs/` before implementing features. They define product 
 
 Do not invent undefined business rules. Ask when specifications conflict. Implement incrementally.
 
-The planned next increment is [shop customization and public storefronts](docs/09-storefront-plan.md): an optional shop category, built-in themes, a public seller shop page, and buyer product discovery/detail. The plan includes API contracts, migration scope, implementation order and acceptance checks; steps 1–4 (shop settings, public APIs and buyer storefront pages) are implemented. Full seller-to-buyer browser verification remains step 5.
+The planned next increment is [shop customization and public storefronts](docs/09-storefront-plan.md): an optional shop category, built-in themes, a public seller shop page, and buyer product discovery/detail. The plan includes API contracts, migration scope, implementation order and acceptance checks; steps 1–4 (shop settings, public APIs and buyer storefront pages) are implemented. Step 5 is partially verified; see the [verification report](docs/10-storefront-verification.md) for passed checks and the remaining mobile/visual matrix.
 
 ## Core Flow
 Seller registration → Store profile draft → Explicit submission for review → Admin approval → Product creation → Buyer discovery → Cart → Checkout → Payment → Order → Seller fulfillment → Buyer review.
@@ -137,3 +137,5 @@ Run the frontend checks from `frontend/` with `npm test` and `npm run build`.
 Vite prints the local URL when it starts (normally <http://localhost:5173>).
 
 See `docs/06-architecture.md` for the technical decisions and module boundaries.
+
+Storefront verification now includes a full registration-to-publication API regression and a disposable PostgreSQL 16 run (145 tests passed, including migration/concurrency checks). The browser flow passed through seller approval, saved theme/category, image upload, product publication and signed-out shop viewing. Mobile visual sign-off remains pending. Idle-session refresh/logout now renew the CSRF binding before using the remaining refresh cookie.

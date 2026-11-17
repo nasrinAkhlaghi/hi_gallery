@@ -97,7 +97,9 @@ async function refreshSession(): Promise<boolean> {
   if (!refreshInFlight) {
     refreshInFlight = (async () => {
       try {
-        if (!csrfToken) await updateCsrf();
+        // The access cookie may have expired since the cached token was issued.
+        // Obtain a token bound to the cookies the browser currently sends.
+        await updateCsrf();
         const response = await rawRequest("/auth/refresh", {
           method: "POST",
           headers: { [csrfHeader]: csrfToken ?? "" },
@@ -212,6 +214,7 @@ export async function rejectAdminSeller(sellerId: string, reason: string): Promi
 
 export async function logout(): Promise<void> {
   try {
+    await updateCsrf();
     await apiRequest<void>("/auth/logout", { method: "POST" });
   } finally {
     csrfToken = null;
