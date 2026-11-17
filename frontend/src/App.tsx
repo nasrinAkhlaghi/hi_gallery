@@ -10,6 +10,7 @@ import { LoginPage, RegistrationPage, RequireAuth } from "./auth/AuthPages";
 import { useAuth } from "./auth/AuthContext";
 import { SellerOnboardingPage } from "./seller/SellerOnboardingPage";
 import { SellerProductsPage, SellerProductFormPage } from "./seller/SellerProductsPage";
+import { SellerShopPage } from "./seller/SellerShopPage";
 import { AdminSellerDetailPage, AdminSellerListPage } from "./admin/AdminSellerReviewPage";
 
 const categories = ["ceramics", "textiles", "jewelry", "homeObjects"] as const;
@@ -187,6 +188,7 @@ function App() {
         <Route path="/browse" element={<BuyerRoutePlaceholder titleKey="pages.browse" />} />
         <Route path="/products/:id" element={<ProductPlaceholder />} />
         <Route path="/categories" element={<BuyerRoutePlaceholder titleKey="pages.categories" />} />
+        <Route path="/shops/:sellerId" element={<BuyerRoutePlaceholder titleKey="pages.shop" />} />
         <Route path="/cart" element={<RequireAuth><BuyerRoutePlaceholder titleKey="pages.cart" /></RequireAuth>} />
         <Route path="/checkout" element={<RequireAuth><BuyerRoutePlaceholder titleKey="pages.checkout" /></RequireAuth>} />
         <Route path="/orders" element={<RequireAuth><BuyerRoutePlaceholder titleKey="pages.orders" /></RequireAuth>} />
@@ -199,7 +201,7 @@ function App() {
           <Route path="products/new" element={<RequireAuth activeSeller><SellerProductFormPage /></RequireAuth>} />
           <Route path="products/:productId" element={<RequireAuth activeSeller><SellerProductFormPage /></RequireAuth>} />
           <Route path="orders" element={<RequireAuth activeSeller><RoutePlaceholder titleKey="pages.orders" /></RequireAuth>} />
-          <Route path="shop" element={<RequireAuth activeSeller><RoutePlaceholder titleKey="pages.shop" /></RequireAuth>} />
+          <Route path="shop" element={<RequireAuth activeSeller><SellerShopPage /></RequireAuth>} />
           <Route path="settings" element={<RequireAuth activeSeller><RoutePlaceholder titleKey="pages.settings" /></RequireAuth>} />
         </Route>
         <Route path="/admin" element={<RequireAuth role="ADMIN"><WorkspaceLayout area="admin" /></RequireAuth>}>

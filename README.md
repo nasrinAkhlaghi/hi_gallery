@@ -32,7 +32,7 @@ Read every file under `docs/` before implementing features. They define product 
 
 Do not invent undefined business rules. Ask when specifications conflict. Implement incrementally.
 
-The planned next increment is [shop customization and public storefronts](docs/09-storefront-plan.md): an optional shop category, built-in themes, a public seller shop page, and buyer product discovery/detail. The plan includes API contracts, migration scope, implementation order and acceptance checks; steps 1 and 2 (shop settings and public shop/product APIs) are implemented, while storefront UI remains planned.
+The planned next increment is [shop customization and public storefronts](docs/09-storefront-plan.md): an optional shop category, built-in themes, a public seller shop page, and buyer product discovery/detail. The plan includes API contracts, migration scope, implementation order and acceptance checks; steps 1–3 (shop settings API/UI and public shop/product APIs) are implemented, while buyer storefront pages remain planned.
 
 ## Core Flow
 Seller registration → Store profile draft → Explicit submission for review → Admin approval → Product creation → Buyer discovery → Cart → Checkout → Payment → Order → Seller fulfillment → Buyer review.
@@ -43,7 +43,7 @@ Seller product management is now implemented: approved sellers can list/filter/p
 
 Local images require Pillow (`pip install -r requirements.txt` from `backend/`). Upload accepts JPEG/PNG/WebP, up to 5 MiB and 16 million pixels; files are validated and re-encoded before storage in `backend/uploads/products` (override with `PRODUCT_UPLOAD_DIR`). Image URLs are public and served by the API under `/media/products/`; both database records and files must be preserved across restarts. Local upload is disabled in production pending a durable storage integration. The Vite development proxy forwards `/media` to the API.
 
-Shop settings API is implemented for approved sellers: `GET/PATCH /api/v1/seller/shop` supports shop details, one optional primary category and built-in themes (`gallery`, `linen`, `clay`). Apply migration `0004_shop_settings` with `alembic upgrade head` from `backend/` after reviewing the target database. Existing sellers retain their status and products, default to `gallery` and have no primary shop category. Public shop/product APIs are also implemented: signed-out visitors can read shops, browse/search/filter products, and open product detail, with shared seller/account/publication eligibility. Shop, Browse, Categories and Product Detail UI are still placeholders; the next implementation step is the Shop settings UI.
+Shop settings API is implemented for approved sellers: `GET/PATCH /api/v1/seller/shop` supports shop details, one optional primary category and built-in themes (`gallery`, `linen`, `clay`). Apply migration `0004_shop_settings` with `alembic upgrade head` from `backend/` after reviewing the target database. Existing sellers retain their status and products, default to `gallery` and have no primary shop category. Public shop/product APIs are also implemented: signed-out visitors can read shops, browse/search/filter products, and open product detail, with shared seller/account/publication eligibility. Approved sellers can now use `/seller/shop` to edit details, choose a primary category, preview three themes, save or discard changes, and open product management. View Shop currently reaches a public route scaffold. Public Shop, Browse, Categories and Product Detail pages are the next implementation step.
 
 ## Local Development
 

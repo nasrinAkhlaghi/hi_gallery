@@ -2,7 +2,7 @@
 
 ## Status and scope
 
-Steps 1 and 2 are implemented in code: additive migration `0004_shop_settings`, seller fields, authenticated shop settings APIs, and public shop/product discovery and detail APIs. Apply the migration to a reviewed target database before running the updated API. Frontend pages (steps 3–5) remain planned. Seller onboarding, Admin approval and approved-seller product management already exist. This document specifies the next connection between Seller Studio and the buyer experience: shop category, shop theme, public shop page, and public product discovery/detail.
+Steps 1–3 are implemented in code: additive migration `0004_shop_settings`, seller fields, authenticated shop settings APIs, public shop/product discovery and detail APIs, and the approved-seller Shop settings UI. Apply the migration to a reviewed target database before running the updated API. Buyer pages and complete seller-to-buyer visual verification (steps 4–5) remain planned. The View Shop link currently reaches a public route scaffold; step 4 replaces it with the real shop page. Seller onboarding, Admin approval and approved-seller product management already exist. This document specifies the next connection between Seller Studio and the buyer experience: shop category, shop theme, public shop page, and public product discovery/detail.
 
 The MVP choices below keep the first implementation small: one optional primary shop category, three built-in themes, UUID-based public shop URLs, and explicit saving of shop settings. Additional categories, custom themes and shop slugs can be added later.
 
@@ -62,7 +62,7 @@ All product lists use zero-based pages, default size 20, allowed sizes 1–100, 
 
 1. **Implemented in code:** migration, model fields and settings API with authorization/validation coverage. The PostgreSQL legacy-data upgrade/downgrade check is opt-in and requires a separate disposable test database.
 2. **Implemented in code:** shared public visibility queries, shop/product endpoints and contract tests. Direct detail URLs, lists and totals enforce the same visibility rules.
-3. Replace `/seller/shop` placeholder with settings, theme previews, save feedback and links to product management/public shop.
+3. **Implemented in code:** `/seller/shop` settings, scoped theme previews, explicit save/discard feedback, category edge cases, product links and a public shop link. English/Persian labels and approval guards are covered by component tests. The public shop destination is a scaffold until step 4; browser visual verification remains pending.
 4. Build `/shops/:sellerId`, `/browse`, `/categories` and `/products/:id`; connect seller links and category navigation to real data.
 5. Verify the complete seller-to-buyer flow in English and Persian on desktop and mobile; update the manual testing guide and implementation status.
 

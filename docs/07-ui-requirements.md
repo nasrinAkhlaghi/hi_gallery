@@ -57,13 +57,13 @@ Do not expose Product Group as a seller field.
 
 Seller order detail shows only that seller's items plus required shipping information.
 
-## Planned Shop Customization and Public Shop
+## Shop Customization and Planned Public Shop
 
-Replace `/seller/shop` with name/description/logo settings, an optional primary shop category, and built-in theme cards (`gallery`, `linen`, `clay`) with a selected state and unsaved preview. Include explicit Save, save/error feedback, View Shop, Products and Add Product links. Only ACTIVE sellers can use these settings. Shop category is independent from the required category in the product form.
+`/seller/shop` now provides name/description/logo settings, an optional primary shop category, and built-in theme cards (`gallery`, `linen`, `clay`) with a selected state and unsaved preview. Include explicit Save, save/error feedback, View Shop, Products and Add Product links. Only ACTIVE sellers can use these settings. Shop category is independent from the required category in the product form.
 
 Add public `/shops/:sellerId` with saved theme, shop identity, active primary category if available and a paginated product grid. Product detail links to the seller's shop. Implement Browse and Categories with real public data. Preserve loading, empty, retry, unavailable and 404 states; show sold-out/zero-stock availability and do not imply checkout works before it is implemented. Theme previews and public pages must support accessible colors, keyboard use, mobile layouts, Persian RTL and English LTR.
 
-These pages/settings are planned. [Storefront plan](09-storefront-plan.md) defines detailed behavior, API contracts, implementation order and acceptance checks.
+Shop settings and its local preview are implemented with English/Persian labels, save/discard controls, preserved edits on failed saves, and non-ACTIVE seller guards. The public shop link reaches a route scaffold until step 4. Buyer pages and browser visual verification remain pending. [Storefront plan](09-storefront-plan.md) defines detailed behavior, API contracts, implementation order and acceptance checks.
 
 ## Admin Console
 Distinct operational interface.

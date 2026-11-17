@@ -243,5 +243,65 @@
     "processing": "Saving decision…",
     "approved": "The seller application was approved.",
     "rejected": "The seller application was rejected."
+  },
+  "sellerShop": {
+    "eyebrow": "Your corner of the gallery",
+    "title": "Make your shop feel like you",
+    "intro": "Tell your story, choose a category and find a look that suits your work.",
+    "viewShop": "View shop",
+    "loading": "Loading your shop…",
+    "formLabel": "Shop settings",
+    "details": "Shop details",
+    "shopName": "Shop name",
+    "description": "Shop description (optional)",
+    "logoUrl": "Logo URL (optional)",
+    "category": "Primary shop category (optional)",
+    "noCategory": "No primary category",
+    "existingCategory": "Current category (no longer available)",
+    "categoryHint": "This describes your shop. Choose a category for each product separately.",
+    "noCategories": "No active categories are available. You can still save your shop without a new category.",
+    "theme": "Choose your shop theme",
+    "themeHint": "Pick a look and see it in the preview. Your changes go live when you save.",
+    "themes": {
+      "gallery": {
+        "name": "Gallery",
+        "description": "Warm and welcoming"
+      },
+      "linen": {
+        "name": "Linen",
+        "description": "Light and understated"
+      },
+      "clay": {
+        "name": "Clay",
+        "description": "Earthy and expressive"
+      }
+    },
+    "save": "Save shop",
+    "saving": "Saving…",
+    "saved": "Your shop settings were saved.",
+    "discard": "Discard changes",
+    "unsaved": "You have unsaved changes.",
+    "upToDate": "All changes saved.",
+    "preview": "Shop preview",
+    "previewUnsaved": "Unsaved preview",
+    "previewSaved": "Saved appearance",
+    "previewHint": "This is a layout preview. Changes are visible to buyers only after you save.",
+    "handmade": "Made by hand",
+    "previewName": "Your shop name",
+    "previewDescription": "A few words about you and the things you make.",
+    "logoAlt": "{{shop}} logo",
+    "previewProducts": "A place for your creations",
+    "previewProductsHint": "Your published products appear below your shop details. These shapes illustrate the layout.",
+    "productsTitle": "Fill your shop with your work",
+    "productsHint": "Add products, choose their categories and manage photos, prices and stock.",
+    "products": "Manage products",
+    "addProduct": "Add product",
+    "requestError": "We could not load or save your shop. Please try again.",
+    "retry": "Try again",
+    "categoryUnavailable": "This category is no longer available. Choose another category or clear your selection.",
+    "invalidTheme": "Choose one of the available shop themes.",
+    "validationError": "Check the shop name and enter a valid HTTP or HTTPS logo URL, then try again.",
+    "forbidden": "This account can no longer edit shop settings. Check your seller status.",
+    "viewStatus": "View seller status"
   }
 }
