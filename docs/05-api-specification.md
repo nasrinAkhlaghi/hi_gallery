@@ -141,7 +141,7 @@ The seller status history is append-only. Phase 4.1 records seller registration 
 
 PATCH requires the existing CSRF and Origin checks and at least one supplied field from `{shop_name,description,logo_url,shop_category_id,theme_id}`. Profile field validation matches `/seller/profile`. Explicit null is allowed for description, logo and category, but not name/theme. Theme must be `gallery`, `linen` or `clay`; invalid values return `422 INVALID_SHOP_THEME`. New category assignments require an ACTIVE category (`422 CATEGORY_UNAVAILABLE`); the current disabled category can be retained. Unknown fields and client-supplied seller/account/status fields are rejected with `422 VALIDATION_ERROR`.
 
-Updates lock and recheck the caller's seller, validate before changing fields, and commit atomically. Saving does not change seller approval, audit history or product categories. The onboarding `/seller/profile` endpoint remains editable only in DRAFT. Apply migration `0004_shop_settings` before using the updated API. The approved-seller Shop settings UI is implemented. Public buyer pages are implemented in step 4; full desktop/mobile browser verification remains pending.
+Updates lock and recheck the caller's seller, validate before changing fields, and commit atomically. Saving does not change seller approval, audit history or product categories. The onboarding `/seller/profile` endpoint remains editable only in DRAFT. Apply migration `0004_shop_settings` before using the updated API. The approved-seller Shop settings UI is implemented. Public buyer pages are implemented in step 4; scoped desktop/mobile browser verification is complete; see the verification report for coverage.
 
 ### Seller products
 

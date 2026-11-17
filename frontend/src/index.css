@@ -21,7 +21,7 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; }
+body { margin: 0; min-width: 0; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; cursor: pointer; }
 .font-display { font-family: 'DM Sans', sans-serif; }

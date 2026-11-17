@@ -2,9 +2,9 @@
 
 ## Status
 
-Steps 1–4 are implemented. Step 5 is partially verified: the automated backend suite passed against isolated SQLite fixtures and a disposable PostgreSQL 16 database, and the real browser flow passed through registration, approval, shop customization, image upload, publication and signed-out discovery. Mobile visual verification remains open because the browser connection became suspended during viewport testing. Do not treat this report as full mobile sign-off.
+Steps 1–5 are complete for the scoped storefront increment. Automated checks and the live registration-to-publication flow passed. Responsive verification covered all three themes in English and Persian at 320, 390, 768 and 1280 px, plus product detail and mobile Seller Studio. This verifies storefront browsing/customization; purchasing and production media storage remain separate work.
 
-All manual data was synthetic. The browser used a separate database inside a throwaway PostgreSQL container, a separate API/frontend port pair and a test-only media directory. The configured development database and existing accounts/products were not modified.
+All manual data was synthetic. The full browser flow used a separate throwaway PostgreSQL database. Responsive and short-expiry checks used an isolated in-memory database with the real API routes, separate API/frontend ports and test-only media. The configured development database and existing accounts/products were not modified.
 
 ## Automated verification
 
@@ -28,17 +28,26 @@ Run frontend checks from `frontend/` with `npm test` and `npm run build`. Run ba
 | Upload synthetic PNG through browser file input | Passed on retry after idle-session interruption |
 | Publish product and sign out | Product image, name, decimal price and seller link visible publicly |
 | Desktop public shop, English and Persian RTL | Inspected; English desktop screenshot captured |
-| Gallery/Linen/Clay persistence and visibility | API and component tests passed; complete visual comparison remains open |
-| Actual mobile viewport and full responsive flow | Not signed off; browser network suspension prevented completion |
+| Gallery/Linen/Clay persistence and visibility | API/component checks and responsive browser inspection passed |
+| All three themes × EN/FA × 320/390/768/1280 px | 24 measured browser checks passed without horizontal overflow after the narrow-screen fix |
+| Product detail × EN/FA × the same four widths | 8 measured checks passed without horizontal overflow |
+| Mobile Seller Studio in EN/FA | Menu, form layout, native keyboard theme selection and Discard passed |
+| Keyboard skip link and search submission | Skip link focused main content; Enter submitted search |
+| Search/category composition, pagination and browser Back | Passed with 25 synthetic products; page 2 showed 5 cards |
+| No-result search, sold-out detail, missing product and broken image | Correct states/fallback observed in the browser |
+| Access-cookie expiry during Save | Live request trace: PATCH 401 → CSRF 200 → refresh 200 → CSRF 200 → retried PATCH 200 |
+| Access-cookie expiry before logout | Current CSRF fetched; logout returned 204 and sign-in UI appeared |
 
-The first delayed upload exposed an expired-cookie/CSRF refresh bug: the upload received 401, then refresh received 403 because its cached CSRF token still referenced the previous access cookie. The frontend now fetches current CSRF state before refresh and logout, and refresh obtains the new access-bound token before retrying the original request. The subsequent browser upload and publication succeeded; the expiry-specific fix has dedicated automated coverage.
+The first delayed upload exposed an expired-cookie/CSRF refresh bug: the upload received 401, then refresh received 403 because its cached CSRF token still referenced the previous access cookie. The frontend now fetches current CSRF state before refresh and logout, and refresh obtains the new access-bound token before retrying the original request. The subsequent browser upload and publication succeeded. The expiry fix also passed a live browser test with five-second access cookies in the isolated QA server, plus dedicated automated regressions. The production token lifetime remains unchanged.
 
 The product-form publication hint was also updated to reflect that public browsing is available.
 
-## Remaining checks
+## Narrow-screen fix and evidence
 
-1. Complete actual 320/390 px mobile, tablet and desktop inspection for all three themes in both languages. Confirm the measured DOM viewport matches the requested size; a background tab may retain a different viewport from the active tab.
-2. Verify keyboard navigation/focus, long text, broken images, unavailable shops/products, empty/filter/no-result states and product-detail gallery layout in the browser.
-3. Verify live browser search/category/pagination/back-forward behavior and a refreshed seller session after real idle expiry. The automated contracts pass; complete this manual matrix before marking step 5 finished.
+The original global `body` minimum width was 320 px. At a 320 px viewport with a visible scrollbar, only 305 px were available, producing a 15 px overflow (on the left in RTL). Removing that minimum allowed the responsive layouts to use the available width. All 24 theme/language/size checks, the 8 product-detail checks and mobile Seller Studio then measured content width no greater than client width.
+
+Verify the active tab's measured viewport when testing: a background tab can retain another size. Screenshots were captured from settled viewport views; local evidence includes Persian mobile Gallery/Linen/Clay shops and product detail, plus the initial English desktop shop. Temporary viewport overrides were reset after verification.
+
+Remaining product work is outside this increment: cart, checkout, payment, reviews and durable production media storage. Repeat this responsive and full-flow regression matrix after changes to navigation, product cards, themes or authentication.
 
 Cart, checkout, payment and reviews remain separate future increments. This verification does not represent purchase-flow or production-storage readiness.
